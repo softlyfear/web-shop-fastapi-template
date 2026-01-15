@@ -5,10 +5,10 @@ from sqlalchemy import ForeignKey
 
 class OrderItem(Base):
     order_id: Mapped[int] = mapped_column(
-        ForeignKey("orders.id", ondelete="CASCADE"),
+        ForeignKey("orders.id", ondelete="CASCADE")
     )
     product_id: Mapped[int] = mapped_column(
-        ForeignKey("products.id", ondelete="CASCADE"),
+        ForeignKey("products.id", ondelete="CASCADE")
     )
     quantity: Mapped[int]
     price: Mapped[num_10_2]

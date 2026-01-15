@@ -10,5 +10,5 @@ class Category(Base, CreateAtMixin, UpdateAtMixin):
     slug: Mapped[str_255] = mapped_column(unique=True)
 
     parent_id: Mapped[int | None] = mapped_column(
-        ForeignKey("categories.id", ondelete="CASCADE"),
+        ForeignKey("categories.id", ondelete="CASCADE")
     )

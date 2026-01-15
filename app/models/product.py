@@ -9,7 +9,7 @@ class Product(Base, CreateAtMixin, UpdateAtMixin):
     description: Mapped[str | None] = mapped_column(Text)
     price: Mapped[num_10_2]
     category_id: Mapped[int] = mapped_column(
-        ForeignKey("categories.id", ondelete="CASCADE"),
+        ForeignKey("categories.id", ondelete="CASCADE")
     )
     image: Mapped[str_255 | None]
     is_active: Mapped[bool] = mapped_column(server_default=text("true"))
