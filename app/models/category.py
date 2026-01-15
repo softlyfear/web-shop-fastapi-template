@@ -4,7 +4,7 @@ from sqlalchemy.orm import Mapped, mapped_column
 
 
 class Category(Base, CreateAtMixin, UpdateAtMixin):
-    __tablename__ = "categories"
+    __tablename__ = "categories"  # type: ignore
 
     name: Mapped[str_255]
     slug: Mapped[str_255] = mapped_column(unique=True)

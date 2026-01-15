@@ -5,7 +5,7 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parents[2]
 
 
-class Settings(BaseSettings):
+class DatabaseSettings(BaseSettings):
     DB_USER: str
     DB_PASSWORD: str
     DB_HOST: str
@@ -21,7 +21,19 @@ class Settings(BaseSettings):
             f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
         )
 
-    model_config = {"env_file": BASE_DIR / ".env", "env_file_encoding": "utf-8"}
+    model_config = {
+        "env_file": BASE_DIR / ".env",
+        "env_file_encoding": "utf-8",
+    }
+
+
+class SchemaSettings(BaseSettings):
+    pass
+
+
+class Settings:
+    db = DatabaseSettings()  # type: ignore
+    schema = SchemaSettings()
 
 
 settings = Settings()

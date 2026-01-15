@@ -4,9 +4,7 @@ from sqlalchemy import ForeignKey
 
 
 class OrderItem(Base):
-    order_id: Mapped[int] = mapped_column(
-        ForeignKey("orders.id", ondelete="CASCADE")
-    )
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"))
     product_id: Mapped[int] = mapped_column(
         ForeignKey("products.id", ondelete="CASCADE")
     )
