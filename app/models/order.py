@@ -1,13 +1,28 @@
-from base import Base, CreateAtMixin, UpdateAtMixin
+import enum
+
+from base import Base, CreateAtMixin, UpdateAtMixin, num_10_2
 from sqlalchemy.orm import Mapped, mapped_column
-from datetime import datetime
-from sqlalchemy import ForeignKey, text
+
+from sqlalchemy import text, Text, ForeignKey, Enum
 
 
-class Order(Base, CreateAtMixin, UpdateAtMixin):
-    __tablename__ = "orders"
+class OrderStatus(enum.Enum):
+    pending = "pending"
+    pain = "paid"
+    shipped = "shipped"
+    delivered = "delivered"
+    cancelled = "cancelled"
 
-    user_id: Mapped[int] = mapped_column(ForeignKey="users.id")
-    # status:
-    total_price: Mapped[int | float]
-    # shipping_addres:
+    class Order(Base, CreateAtMixin, UpdateAtMixin):
+        user_id: Mapped[int] = mapped_column(
+            ForeignKey("user.id", ondelete="CASCADE"),
+        )
+
+    status: Mapped[OrderStatus] = mapped_column(
+        Enum(OrderStatus),
+        default=OrderStatus.pending,
+        server_default=text("pending"),
+    )
+
+    total_price: Mapped[num_10_2]
+    hipping_address: Mapped[str] = mapped_column(Text)
