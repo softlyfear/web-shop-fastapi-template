@@ -8,4 +8,4 @@ class User(Base, CreateAtMixin, UpdateAtMixin):
     username: Mapped[str] = mapped_column(unique=True)
     hashed_password: Mapped[str]
     is_active: Mapped[bool] = mapped_column(server_default=text("true"))
-    is_superuser: Mapped[bool]
+    is_superuser: Mapped[bool] = mapped_column(server_default=text("false"))
