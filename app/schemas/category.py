@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from schemas.base import BaseSchema
+from app.schemas.base import BaseSchema
 
 
 class CategoryBase(BaseSchema):
