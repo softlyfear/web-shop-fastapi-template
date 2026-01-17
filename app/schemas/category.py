@@ -1,4 +1,4 @@
-from app.schemas.base import BaseSchema
+from schemas.base import BaseSchema
 from datetime import datetime
 
 
@@ -6,10 +6,6 @@ class CategoryBase(BaseSchema):
     name: str
     slug: str
     parent_id: int | None = None
-
-
-class CategoryCreate(CategoryBase):
-    pass
 
 
 class CategoryUpdate(BaseSchema):
@@ -20,5 +16,6 @@ class CategoryUpdate(BaseSchema):
 
 class CategoryRead(CategoryBase):
     id: int
+    parent_id: int | None = None
     created_at: datetime
     updated_at: datetime

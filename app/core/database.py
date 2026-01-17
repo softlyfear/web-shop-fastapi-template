@@ -1,4 +1,4 @@
-from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker
+from sqlalchemy.ext.asyncio import create_async_engine
 from sqlalchemy import create_engine
 from app.core.config import settings
 
@@ -11,4 +11,7 @@ class DatabaseEngine:
         max_overflow=10,
     )
 
-    sync_engine = create_engine(url=settings.db.SYNC_DATABASE_URL, echo=False)
+    sync_engine = create_engine(
+        url=settings.db.SYNC_DATABASE_URL,
+        echo=False,
+    )
