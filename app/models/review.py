@@ -1,4 +1,4 @@
-from base import Base, CreateAtMixin
+from app.models.base import Base, CreateAtMixin
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import ForeignKey, Text, CheckConstraint
 

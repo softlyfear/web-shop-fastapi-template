@@ -1,4 +1,4 @@
-from schemas.base import BaseSchema
+from app.schemas.base import BaseSchema
 from datetime import datetime
 
 

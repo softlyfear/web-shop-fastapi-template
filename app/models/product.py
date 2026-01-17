@@ -1,4 +1,4 @@
-from base import Base, CreateAtMixin, UpdateAtMixin, str_255, num_10_2
+from app.models.base import Base, CreateAtMixin, UpdateAtMixin, str_255, num_10_2
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import ForeignKey, Text, text
 

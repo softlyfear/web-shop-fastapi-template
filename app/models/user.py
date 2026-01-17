@@ -1,4 +1,4 @@
-from base import Base, CreateAtMixin, UpdateAtMixin
+from app.models.base import Base, CreateAtMixin, UpdateAtMixin
 from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import text
 
