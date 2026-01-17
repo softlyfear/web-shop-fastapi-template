@@ -1,9 +1,9 @@
 import enum
 
-from app.models.base import Base, CreateAtMixin, UpdateAtMixin, num_10_2
+from sqlalchemy import Enum, ForeignKey, Text, text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from sqlalchemy import text, Text, ForeignKey, Enum
+from app.models.base import Base, CreateAtMixin, UpdateAtMixin, num_10_2
 
 
 class OrderStatus(enum.Enum):

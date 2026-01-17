@@ -1,6 +1,7 @@
-from app.models.base import Base, CreateAtMixin, UpdateAtMixin, str_255, num_10_2
-from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import ForeignKey, Text, text
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.models.base import Base, CreateAtMixin, UpdateAtMixin, num_10_2, str_255
 
 
 class Product(Base, CreateAtMixin, UpdateAtMixin):

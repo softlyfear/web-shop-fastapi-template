@@ -1,6 +1,7 @@
-from app.models.base import Base, CreateAtMixin, UpdateAtMixin
-from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import text
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.models.base import Base, CreateAtMixin, UpdateAtMixin
 
 
 class User(Base, CreateAtMixin, UpdateAtMixin):

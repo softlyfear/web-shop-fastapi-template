@@ -1,4 +1,5 @@
 from fastapi import APIRouter
+
 from app.web import catalog
 
 router = APIRouter()

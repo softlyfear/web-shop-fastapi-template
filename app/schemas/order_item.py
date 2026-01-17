@@ -1,5 +1,6 @@
-from app.schemas.base import BaseSchema
 from decimal import Decimal
+
+from app.schemas.base import BaseSchema
 
 
 class OrderItemBase(BaseSchema):

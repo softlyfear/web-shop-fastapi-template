@@ -1,14 +1,13 @@
+from datetime import datetime
 from typing import Annotated
 
-from sqlalchemy import String, Numeric, Integer, text
+from sqlalchemy import Integer, Numeric, String, text
 from sqlalchemy.orm import (
     DeclarativeBase,
-    mapped_column,
-    declared_attr,
     Mapped,
+    declared_attr,
+    mapped_column,
 )
-from datetime import datetime
-
 
 str_255 = Annotated[str, 255]
 num_10_2 = Annotated[float, 10]
