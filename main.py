@@ -1,13 +1,24 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from sqladmin import Admin
 
-from app.core.database import DatabaseEngine
-from app.models import UserAdmin
-from app.web.router import router as web_router
+from app.core import async_engine
+from app.models import Base
+from app.models.admin import UserAdmin
+from app.web import router as web_router
 
-app = FastAPI()
-admin = Admin(app, DatabaseEngine.async_engine)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    async with async_engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
+admin = Admin(app, async_engine)
 admin.add_view(UserAdmin)
 
 

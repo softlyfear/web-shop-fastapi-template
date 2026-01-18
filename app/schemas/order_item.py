@@ -1,12 +1,16 @@
 from decimal import Decimal
 
-from app.schemas.base import BaseSchema
+from app.schemas import BaseSchema
 
 
 class OrderItemBase(BaseSchema):
     product_id: int
     quantity: int
     price: Decimal
+
+
+class OrderItemCreate(BaseSchema):
+    pass
 
 
 class OrderItemUpdate(BaseSchema):

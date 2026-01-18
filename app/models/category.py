@@ -1,7 +1,7 @@
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models.base import Base, CreateAtMixin, UpdateAtMixin, str_255
+from app.models import Base, CreateAtMixin, UpdateAtMixin, str_255
 
 
 class Category(Base, CreateAtMixin, UpdateAtMixin):

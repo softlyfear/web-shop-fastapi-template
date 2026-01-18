@@ -1,12 +1,16 @@
 from datetime import datetime
 
-from app.schemas.base import BaseSchema
+from app.schemas import BaseSchema
 
 
 class CategoryBase(BaseSchema):
     name: str
     slug: str
     parent_id: int | None = None
+
+
+class CategoryCreate(BaseSchema):
+    pass
 
 
 class CategoryUpdate(BaseSchema):

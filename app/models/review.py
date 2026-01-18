@@ -1,7 +1,7 @@
 from sqlalchemy import CheckConstraint, ForeignKey, Text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models.base import Base, CreateAtMixin
+from app.models import Base, CreateAtMixin
 
 
 class Review(Base, CreateAtMixin):

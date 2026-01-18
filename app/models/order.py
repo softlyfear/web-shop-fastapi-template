@@ -3,7 +3,7 @@ import enum
 from sqlalchemy import Enum, ForeignKey, Text, text
 from sqlalchemy.orm import Mapped, mapped_column
 
-from app.models.base import Base, CreateAtMixin, UpdateAtMixin, num_10_2
+from app.models import Base, CreateAtMixin, UpdateAtMixin, num_10_2
 
 
 class OrderStatus(enum.Enum):
