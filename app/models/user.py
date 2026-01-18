@@ -10,3 +10,6 @@ class User(Base, CreateAtMixin, UpdateAtMixin):
     hashed_password: Mapped[str]
     is_active: Mapped[bool] = mapped_column(server_default=text("true"))
     is_superuser: Mapped[bool] = mapped_column(server_default=text("false"))
+
+    def __str__(self) -> str:
+        return self.username

@@ -2,11 +2,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
-from sqladmin import Admin
 
+from app.admin.setup import setup_admin
 from app.core import async_engine
 from app.models import Base
-from app.models.admin import UserAdmin
 from app.web import router as web_router
 
 
@@ -18,8 +17,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
-admin = Admin(app, async_engine)
-admin.add_view(UserAdmin)
+setup_admin(app)
 
 
 app.mount("/static", StaticFiles(directory="app/static"), name="static")

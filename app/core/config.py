@@ -18,9 +18,13 @@ class DatabaseSettings(BaseSettings):
     MAX_OVERFLOW: int
     POOL_PRE_PING: bool
     POOL_RECYCLE: int
-
     AUTOFLUSH: bool
     EXPIRE_ON_COMMIT: bool
+
+    ADMIN_CAN_CREATE: bool
+    ADMIN_CAN_EDIT: bool
+    ADMIN_CAN_DELETE: bool
+    ADMIN_CAN_VIEW_DETAILS: bool
 
     @computed_field
     @property
