@@ -15,6 +15,8 @@ from app.web.router import router as web_router
 
 app = FastAPI()
 
+
+
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 app.include_router(web_router)
