@@ -9,7 +9,7 @@ class CategoryBase(BaseSchema):
     parent_id: int | None = None
 
 
-class CategoryCreate(BaseSchema):
+class CategoryCreate(CategoryBase):
     pass
 
 

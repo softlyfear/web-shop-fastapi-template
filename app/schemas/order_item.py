@@ -1,3 +1,4 @@
+from datetime import datetime
 from decimal import Decimal
 
 from app.schemas import BaseSchema
@@ -9,7 +10,7 @@ class OrderItemBase(BaseSchema):
     price: Decimal
 
 
-class OrderItemCreate(BaseSchema):
+class OrderItemCreate(OrderItemBase):
     pass
 
 
@@ -22,3 +23,5 @@ class OrderItemUpdate(BaseSchema):
 class OrderItemRead(OrderItemBase):
     id: int
     order_id: int
+    created_at: datetime
+    updated_at: datetime

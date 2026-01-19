@@ -5,12 +5,16 @@ from app.schemas.category import (
     CategoryRead,
     CategoryUpdate,
 )
+from app.schemas.order import OrderBase, OrderCreate, OrderRead, OrderUpdate
 from app.schemas.order_item import (
     OrderItemBase,
     OrderItemCreate,
     OrderItemRead,
     OrderItemUpdate,
 )
+from app.schemas.product import ProductBase, ProductCreate, ProductRead, ProductUpdate
+from app.schemas.review import ReviewBase, ReviewCreate, ReviewRead, ReviewUpdate
+from app.schemas.user import UserBase, UserCreate, UserRead, UserUpdate
 
 __all__ = [
     "BaseSchema",
@@ -22,4 +26,21 @@ __all__ = [
     "OrderItemCreate",
     "OrderItemRead",
     "OrderItemUpdate",
+    "OrderBase",
+    "OrderCreate",
+    "OrderRead",
+    "OrderUpdate",
+    "ProductBase",
+    "ProductCreate",
+    "ProductRead",
+    "CategoryUpdate",
+    "ReviewBase",
+    "ProductUpdate",
+    "ReviewCreate",
+    "ReviewRead",
+    "ReviewUpdate",
+    "UserBase",
+    "UserCreate",
+    "UserRead",
+    "UserUpdate",
 ]
