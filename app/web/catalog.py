@@ -6,10 +6,15 @@ from app.core import templates
 router = APIRouter()
 
 
-@router.get("/", response_class=HTMLResponse)
-async def home(request: Request):
+@router.get("/catalogs/", response_class=HTMLResponse)
+async def get_catalogs(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="home.html",
-        context={"categories": [], "products": []},
+        context={
+            "request": request,
+            "categories": [],
+            "products": [],
+            "current_user": None,
+        },
     )
