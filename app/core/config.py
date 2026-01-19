@@ -7,11 +7,11 @@ BASE_DIR = Path(__file__).resolve().parents[2]
 
 
 class DatabaseSettings(BaseSettings):
-    DB_USER: str
-    DB_PASSWORD: str
-    DB_HOST: str
-    DB_PORT: int
-    DB_NAME: str
+    USER: str
+    PASSWORD: str
+    HOST: str
+    PORT: int
+    NAME: str
 
     ECHO: bool
     POOL_SIZE: int
@@ -21,18 +21,13 @@ class DatabaseSettings(BaseSettings):
     AUTOFLUSH: bool
     EXPIRE_ON_COMMIT: bool
 
-    ADMIN_CAN_CREATE: bool
-    ADMIN_CAN_EDIT: bool
-    ADMIN_CAN_DELETE: bool
-    ADMIN_CAN_VIEW_DETAILS: bool
-
     @computed_field
     @property
     def ASYNC_DATABASE_URL(self) -> str:
         return (
             f"postgresql+asyncpg://"
-            f"{self.DB_USER}:{self.DB_PASSWORD}"
-            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+            f"{self.USER}:{self.PASSWORD}"
+            f"@{self.HOST}:{self.PORT}/{self.NAME}"
         )
 
     @computed_field
@@ -40,23 +35,39 @@ class DatabaseSettings(BaseSettings):
     def SYNC_DATABASE_URL(self) -> str:
         return (
             f"postgresql+psycopg://"
-            f"{self.DB_USER}:{self.DB_PASSWORD}"
-            f"@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
+            f"{self.USER}:{self.PASSWORD}"
+            f"@{self.HOST}:{self.PORT}/{self.NAME}"
         )
 
     model_config = {
+        "env_prefix": "DB_",
         "env_file": BASE_DIR / ".env",
         "env_file_encoding": "utf-8",
+        "extra": "ignore",
     }
 
 
-class SchemaSettings(BaseSettings):
-    pass
+class AdminSettings(BaseSettings):
+    USERNAME: str
+    PASSWORD: str
+    SECRET_KEY: str
+
+    CAN_CREATE: bool
+    CAN_EDIT: bool
+    CAN_DELETE: bool
+    CAN_VIEW_DETAILS: bool
+
+    model_config = {
+        "env_prefix": "ADMIN_",
+        "env_file": BASE_DIR / ".env",
+        "env_file_encoding": "utf-8",
+        "extra": "ignore",
+    }
 
 
-class Settings:
-    db = DatabaseSettings()  # type: ignore
-    schema = SchemaSettings()
+class Settings(BaseSettings):
+    db: DatabaseSettings = DatabaseSettings()  # type: ignore
+    admin: AdminSettings = AdminSettings()  # type: ignore
 
 
 settings = Settings()

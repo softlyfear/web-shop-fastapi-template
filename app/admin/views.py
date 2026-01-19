@@ -5,10 +5,10 @@ from app.models import Category, Order, OrderItem, Product, Review, User
 
 
 class BaseAdmin(ModelView):
-    can_create = settings.db.ADMIN_CAN_CREATE
-    can_edit = settings.db.ADMIN_CAN_EDIT
-    can_delete = settings.db.ADMIN_CAN_DELETE
-    can_view_details = settings.db.ADMIN_CAN_VIEW_DETAILS
+    can_create = settings.admin.CAN_CREATE
+    can_edit = settings.admin.CAN_EDIT
+    can_delete = settings.admin.CAN_DELETE
+    can_view_details = settings.admin.CAN_VIEW_DETAILS
 
 
 class UserAdmin(BaseAdmin, model=User):

@@ -2,9 +2,10 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
+from starlette.middleware.sessions import SessionMiddleware
 
 from app.admin.setup import setup_admin
-from app.core import async_engine
+from app.core import async_engine, settings
 from app.models import Base
 from app.web import router as web_router
 
@@ -17,6 +18,7 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(lifespan=lifespan)
+app.add_middleware(SessionMiddleware, secret_key=settings.admin.SECRET_KEY)
 setup_admin(app)
 
 
