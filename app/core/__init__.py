@@ -1,5 +1,6 @@
 from app.core.config import settings
 from app.core.database import async_engine, async_factory
+from app.core.deps import SessionDep
 from app.core.templates import templates
 
 __all__ = [
@@ -7,4 +8,5 @@ __all__ = [
     "templates",
     "async_engine",
     "async_factory",
+    "SessionDep",
 ]
