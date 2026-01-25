@@ -7,7 +7,7 @@ router = APIRouter()
 
 
 @router.get("/catalogs/", response_class=HTMLResponse)
-async def get_catalogs(request: Request):
+async def get_catalogs(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         request=request,
         name="home.html",

@@ -6,14 +6,14 @@ from app.core import templates
 router = APIRouter()
 
 
-@router.get("/login/", response_class=HTMLResponse, name="login")
-async def get_login(request: Request) -> HTMLResponse:
+@router.get("/", response_class=HTMLResponse, name="home")
+async def home(request: Request) -> HTMLResponse:
     return templates.TemplateResponse(
         request=request,
-        name="login.html",
+        name="home.html",
         context={
             "request": request,
-            "current_user": None,
-            "error": None,
+            "categories": [],
+            "products": [],
         },
     )
