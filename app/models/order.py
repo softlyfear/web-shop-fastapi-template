@@ -22,7 +22,9 @@ class OrderStatus(enum.Enum):
 class Order(Base, CreateAtMixin, UpdateAtMixin):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     status: Mapped[OrderStatus] = mapped_column(
-        Enum(OrderStatus), default=OrderStatus.pending, server_default=text("'pending'")
+        Enum(OrderStatus),
+        default=OrderStatus.pending,
+        server_default=text("'pending'"),
     )
     total_price: Mapped[num_10_2]
     shipping_address: Mapped[str] = mapped_column(Text)

@@ -19,7 +19,6 @@ class UserCreate(UserBase):
 class UserUpdate(BaseSchema):
     email: EmailStr | None = None
     username: str | None = None
-    hashed_password: str | None = None
     is_active: bool | None = None
     is_superuser: bool | None = None
 

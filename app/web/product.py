@@ -11,5 +11,9 @@ async def home(request: Request):
     return templates.TemplateResponse(
         request=request,
         name="home.html",
-        context={"categories": [], "products": []},
+        context={
+            "request": request,
+            "categories": [],
+            "products": [],
+        },
     )

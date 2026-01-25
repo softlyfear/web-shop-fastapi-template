@@ -18,7 +18,7 @@ class Base(DeclarativeBase):
 
     type_annotation_map = {
         str_255: String(255),
-        num_10_2: Numeric(precision=10, scale=2),
+        num_10_2: Numeric(precision=10, scale=2, asdecimal=True),
     }
 
     @declared_attr.directive
