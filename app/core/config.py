@@ -23,18 +23,9 @@ class DatabaseSettings(BaseSettings):
 
     @computed_field
     @property
-    def ASYNC_DATABASE_URL(self) -> str:
+    def DATABASE_URL(self) -> str:
         return (
             f"postgresql+asyncpg://"
-            f"{self.USER}:{self.PASSWORD}"
-            f"@{self.HOST}:{self.PORT}/{self.NAME}"
-        )
-
-    @computed_field
-    @property
-    def SYNC_DATABASE_URL(self) -> str:
-        return (
-            f"postgresql+psycopg://"
             f"{self.USER}:{self.PASSWORD}"
             f"@{self.HOST}:{self.PORT}/{self.NAME}"
         )
