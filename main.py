@@ -1,4 +1,4 @@
-import subprocess
+import asyncio
 from contextlib import asynccontextmanager
 
 import uvicorn
@@ -13,7 +13,14 @@ from app.web import router as web_router
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    subprocess.run(["alembic", "upgrade", "head"], check=True)
+    proc = await asyncio.create_subprocess_exec(
+        "alembic",
+        "upgrade",
+        "head",
+        stdout=asyncio.subprocess.PIPE,
+        stderr=asyncio.subprocess.PIPE,
+    )
+    await proc.communicate()
     yield
 
 
