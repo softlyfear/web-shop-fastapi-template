@@ -28,7 +28,7 @@
         <nav class="header__nav">
             <ul>
                 <li><a href="{{ url_for('home') }}">Products</a></li>
-                <li><a href="{{ url_for('guides') }}">Guides & Recipes</a></li>
+                <li><a href="#">Guides & Recipes</a></li>
                 <li><a href="#">Community</a></li>
                 <li><a href="#">Resources</a></li>
                 <li><a href="#">Contact</a></li>
@@ -38,18 +38,18 @@
         {% if current_user %}
         <!-- Block for authorized user -->
         <div class="header__user-actions" id="auth-user">
-            <a href="{{ url_for('account') }}" class="user-icon" aria-label="My Account">
+            <a href="#" class="user-icon" aria-label="My Account">
                 <img src="{{ url_for('static', path='/img/icons/User_alt.svg') }}" alt="User Account">
             </a>
-            <a href="{{ url_for('cart') }}" class="cart-icon" aria-label="Shopping Cart">
+            <a href="#" class="cart-icon" aria-label="Shopping Cart">
                 <img src="{{ url_for('static', path='/img/icons/Shopping_bag.svg') }}" alt="Shopping Cart">
             </a>
         </div>
         {% else %}
         <!-- Block for unauthorized user -->
         <div class="header__auth-buttons" id="auth-guest">
-            <a href="{{ url_for('login') }}" class="button button--secondary">Sign in</a>
-            <a href="{{ url_for('register') }}" class="button button--primary">Register</a>
+            <a href="#" class="button button--secondary">Sign in</a>
+            <a href="#" class="button button--primary">Register</a>
         </div>
         {% endif %}
     </div>

@@ -12,107 +12,85 @@
     <aside class="sidebar filter-menu">
         <form method="get" action="{{ url_for('home') }}">
             <div class="sidebar__section">
-                <h3 class="section-title">Keywords</h3>
+                <h3 class="section-title">Search</h3>
                 <div class="keywords-list">
-                    <input type="text" name="search" class="search-input" placeholder="Search" value="{{ request.query_params.get('search', '') }}">
+                    <input type="text" name="search" class="search-input" placeholder="Type here..." value="{{ request.query_params.get('search', '') if request and request.query_params else '' }}">
                 </div>
             </div>
 
             <div class="sidebar__section">
-                <h3 class="section-title">Product Type</h3>
+                <h3 class="section-title">Categories</h3>
                 <div class="checkbox-group">
-                    {% for category in categories %}
-                    <label class="checkbox-container">{{ category.name }}
-                        <input type="checkbox" name="category" value="{{ category.id }}" {% if category.id|string in request.query_params.getlist('category') %}checked{% endif %}>
-                        <span class="checkmark"></span>
-                    </label>
-                    {% endfor %}
+                    {% if categories and categories|length > 0 %}
+                        {% for category in categories %}
+                        <label class="checkbox-container">{{ category.name }}
+                            <input type="checkbox" name="category" value="{{ category.slug }}" {% if request and request.query_params and category.slug in request.query_params.getlist('category') %}checked{% endif %}>
+                            <span class="checkmark"></span>
+                        </label>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No categories available</p>
+                    {% endif %}
                 </div>
             </div>
 
             <div class="sidebar__section">
                 <h3 class="section-title">Price Range</h3>
-                <div class="price-range">
-                    <input type="number" name="min_price" placeholder="Min" value="{{ request.query_params.get('min_price', '') }}" step="0.01">
+                <div class="price-range" style="display: flex; gap: 8px; align-items: center;">
+                    <input type="number" name="min_price" class="Input" placeholder="Min" value="{{ request.query_params.get('min_price', '') if request and request.query_params else '' }}" step="0.01" style="width: 80px;">
                     <span>-</span>
-                    <input type="number" name="max_price" placeholder="Max" value="{{ request.query_params.get('max_price', '') }}" step="0.01">
+                    <input type="number" name="max_price" class="Input" placeholder="Max" value="{{ request.query_params.get('max_price', '') if request and request.query_params else '' }}" step="0.01" style="width: 80px;">
                 </div>
             </div>
 
-            <button type="submit" class="button button--primary">Apply Filters</button>
+            <button type="submit" class="button button--primary" style="width: 100%;">Apply Filters</button>
+            <a href="{{ url_for('home') }}" class="button button--secondary" style="width: 100%; margin-top: 8px; text-decoration: none; display: flex; justify-content: center; align-items: center;">Clear All</a>
         </form>
     </aside>
 
     <section class="products-area product-grid-section">
         <div class="search-sort-bar">
-            <form method="get" action="{{ url_for('home') }}" class="search-form">
-                <div class="search-input-wrapper">
-                    <input type="text" name="search" placeholder="Search" class="search-input" value="{{ request.query_params.get('search', '') }}">
-                    <button type="submit" class="search-button" aria-label="Search">
-                        <i class="fa-solid fa-magnifying-glass"></i>
-                    </button>
-                </div>
-            </form>
+            <div class="results-count">
+                {% if products and products|length > 0 %}
+                    Showing {{ products|length }} products
+                {% else %}
+                    No products yet
+                {% endif %}
+            </div>
             <div class="sort-options">
-                <a href="{{ url_for('home', sort='new') }}" class="sort-button {% if request.query_params.get('sort') == 'new' or not request.query_params.get('sort') %}active-sort{% endif %}">
+                <span style="font-size: 14px; align-self: center; margin-right: 8px; color: var(--grey-text);">Sort by:</span>
+                <a href="{{ url_for('home') }}?sort=new" class="sort-button active-sort">
                     <span>New</span>
                 </a>
-                <a href="{{ url_for('home', sort='price_asc') }}" class="sort-button {% if request.query_params.get('sort') == 'price_asc' %}active-sort{% endif %}">Price ascending</a>
-                <a href="{{ url_for('home', sort='price_desc') }}" class="sort-button {% if request.query_params.get('sort') == 'price_desc' %}active-sort{% endif %}">Price descending</a>
-                <a href="{{ url_for('home', sort='rating') }}" class="sort-button {% if request.query_params.get('sort') == 'rating' %}active-sort{% endif %}">Rating</a>
+                <a href="{{ url_for('home') }}?sort=price_asc" class="sort-button">Price ↑</a>
+                <a href="{{ url_for('home') }}?sort=price_desc" class="sort-button">Price ↓</a>
             </div>
         </div>
 
         <div class="product-grid">
-            {% if products %}
+            {% if products and products|length > 0 %}
                 {% for product in products %}
-                <a href="{{ url_for('product_detail', slug=product.slug) }}" class="product-card-link">
+                <a href="#" class="product-card-link">
                     <div class="product-card">
-                        <img src="{{ url_for('static', path='/img/products/' + (product.image or 'default.jpg')) }}" alt="{{ product.name }}" class="product-card__image">
+                        <img src="{{ url_for('static', path='/img/products/' + (product.image if product.image else 'default.jpg')) }}" alt="{{ product.name }}" class="product-card__image">
                         <div class="product-card__info">
                             <h4 class="product-card__name">{{ product.name }}</h4>
                             <p class="product-card__price">${{ "%.2f"|format(product.price) }}</p>
-                            <p class="product-card__description">{{ product.description[:50] }}{% if product.description|length > 50 %}...{% endif %}</p>
+                            <p class="product-card__description">{{ product.description[:80] if product.description else '' }}{% if product.description and product.description|length > 80 %}...{% endif %}</p>
                         </div>
                     </div>
                 </a>
                 {% endfor %}
             {% else %}
-                <p class="no-products">No products found</p>
+                <div class="no-products" style="grid-column: 1 / -1; text-align: center; padding: 64px; background: var(--background-default); border-radius: 8px;">
+                    <i class="fa-solid fa-box-open" style="font-size: 48px; color: var(--grey-text); margin-bottom: 16px;"></i>
+                    <p style="font-size: 18px; color: var(--grey-text);">No products available yet. Backend will provide product data.</p>
+                    <a href="{{ url_for('home') }}" class="button button--primary" style="display: inline-flex; margin-top: 24px;">Refresh</a>
+                </div>
             {% endif %}
         </div>
 
-        {% if pagination %}
-        <div class="pagination">
-            {% if pagination.has_prev %}
-            <a href="{{ url_for('home', page=pagination.prev_num, **request.query_params) }}" class="pagination__link pagination__link--prev">
-                <i class="fa-solid fa-arrow-left"></i>
-                <span>Previous</span>
-            </a>
-            {% endif %}
-            
-            <div class="pagination-list">
-                {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
-                    {% if page_num %}
-                        {% if page_num == pagination.page %}
-                            <span class="pagination__link active">{{ page_num }}</span>
-                        {% else %}
-                            <a href="{{ url_for('home', page=page_num, **request.query_params) }}" class="pagination__link">{{ page_num }}</a>
-                        {% endif %}
-                    {% else %}
-                        <span class="pagination__dots">...</span>
-                    {% endif %}
-                {% endfor %}
-            </div>
-            
-            {% if pagination.has_next %}
-            <a href="{{ url_for('home', page=pagination.next_num, **request.query_params) }}" class="pagination__link pagination__link--next">
-                <span>Next</span>
-                <i class="fa-solid fa-arrow-right"></i>
-            </a>
-            {% endif %}
-        </div>
-        {% endif %}
+        {# Pagination will be added by backend when needed #}
     </section>
 </div>
 {% endblock %}
