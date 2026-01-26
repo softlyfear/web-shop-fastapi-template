@@ -8,6 +8,7 @@ router = APIRouter()
 
 @router.get("/login/", response_class=HTMLResponse, name="login")
 async def get_login(request: Request) -> HTMLResponse:
+    """Отображение страницы входа в систему."""
     return templates.TemplateResponse(
         request=request,
         name="login.html",

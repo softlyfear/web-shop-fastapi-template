@@ -8,6 +8,7 @@ router = APIRouter()
 
 @router.get("/", response_class=HTMLResponse, name="home")
 async def home(request: Request) -> HTMLResponse:
+    """Отображение домашней страницы."""
     return templates.TemplateResponse(
         request=request,
         name="home.html",
