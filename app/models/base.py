@@ -14,7 +14,7 @@ num_10_2 = Annotated[float, 10]
 
 
 class Base(DeclarativeBase):
-    __abstract__ = True
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
     type_annotation_map = {
         str_255: String(255),
@@ -24,8 +24,6 @@ class Base(DeclarativeBase):
     @declared_attr.directive
     def __tablename__(cls) -> str:
         return f"{cls.__name__.lower()}s"
-
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
 
 
 class CreateAtMixin:
