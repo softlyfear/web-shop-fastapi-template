@@ -6,6 +6,7 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.sessions import SessionMiddleware
 
 from app.admin.setup import setup_admin
+from app.api.v1 import router_v1
 from app.core import settings
 from app.web import router as web_router
 
@@ -25,6 +26,7 @@ app.mount("/static", StaticFiles(directory="app/static"), name="static")
 
 
 app.include_router(web_router)
+app.include_router(router_v1)
 
 
 if __name__ == "__main__":
