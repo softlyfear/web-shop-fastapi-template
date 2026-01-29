@@ -5,7 +5,7 @@ from app.schemas import BaseSchema
 
 class CategoryBase(BaseSchema):
     name: str
-    slug: str
+    slug: str | None = None
     parent_id: int | None = None
 
 

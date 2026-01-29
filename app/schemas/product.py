@@ -6,7 +6,7 @@ from app.schemas import BaseSchema
 
 class ProductBase(BaseSchema):
     name: str
-    slug: str
+    slug: str | None = None
     description: str | None = None
     price: Decimal
     category_id: int
