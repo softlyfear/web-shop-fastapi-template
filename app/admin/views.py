@@ -33,7 +33,7 @@ class CategoryAdmin(BaseAdmin, model=Category):
     ]
 
     async def insert_model(self, request, data):
-        """Добавить авто-генерацию slug"""
+        """Авто-генерация slug"""
         if not data.get("slug"):
             data["slug"] = slugify(data.get("name", ""))
         return await super().insert_model(request, data)
@@ -77,7 +77,7 @@ class ProductAdmin(BaseAdmin, model=Product):
     ]
 
     async def insert_model(self, request, data):
-        """Добавить авто-генерацию slug"""
+        """Авто-генерация slug"""
         if not data.get("slug"):
             data["slug"] = slugify(data.get("name", ""))
         return await super().insert_model(request, data)
