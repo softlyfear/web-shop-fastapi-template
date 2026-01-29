@@ -14,7 +14,11 @@ num_10_2 = Annotated[float, 10]
 
 
 class Base(DeclarativeBase):
-    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    id: Mapped[int] = mapped_column(
+        Integer,
+        primary_key=True,
+        autoincrement=True,
+    )
 
     type_annotation_map = {
         str_255: String(255),

@@ -11,7 +11,7 @@ from app.models import Base, CreateAtMixin, UpdateAtMixin, num_10_2, str_255
 
 class Product(Base, CreateAtMixin, UpdateAtMixin):
     name: Mapped[str_255]
-    slug: Mapped[str_255] = mapped_column(unique=True)
+    slug: Mapped[str_255 | None] = mapped_column(unique=True)
     description: Mapped[str | None] = mapped_column(Text)
     price: Mapped[num_10_2]
     category_id: Mapped[int] = mapped_column(
@@ -22,3 +22,6 @@ class Product(Base, CreateAtMixin, UpdateAtMixin):
     stock: Mapped[int] = mapped_column(default=0)
 
     category: Mapped["Category"] = relationship("Category", back_populates="products")
+
+    def __str__(self) -> str:
+        return self.name

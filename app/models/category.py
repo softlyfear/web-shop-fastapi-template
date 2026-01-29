@@ -13,7 +13,7 @@ class Category(Base, CreateAtMixin, UpdateAtMixin):
     __tablename__ = "categories"  # type: ignore
 
     name: Mapped[str_255]
-    slug: Mapped[str_255] = mapped_column(unique=True)
+    slug: Mapped[str_255 | None] = mapped_column(unique=True)
 
     parent_id: Mapped[int | None] = mapped_column(
         ForeignKey("categories.id", ondelete="CASCADE")

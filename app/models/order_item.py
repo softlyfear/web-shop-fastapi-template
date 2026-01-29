@@ -22,3 +22,6 @@ class OrderItem(Base):
 
     order: Mapped["Order"] = relationship("Order", back_populates="items")
     product: Mapped["Product"] = relationship("Product")
+
+    def __str__(self) -> str:
+        return f"{self.quantity}x Product #{self.product_id} (${self.price})"

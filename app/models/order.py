@@ -5,7 +5,7 @@ from sqlalchemy import Enum, ForeignKey, Text, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
-    from app.models.order_item import OrderItem
+    from app.models import OrderItem, User
 
 
 from app.models import Base, CreateAtMixin, UpdateAtMixin, num_10_2
@@ -29,4 +29,11 @@ class Order(Base, CreateAtMixin, UpdateAtMixin):
     total_price: Mapped[num_10_2]
     shipping_address: Mapped[str] = mapped_column(Text)
 
-    items: Mapped[list["OrderItem"]] = relationship("OrderItem", back_populates="order")
+    items: Mapped[list["OrderItem"]] = relationship(
+        "OrderItem", back_populates="order", cascade="all, delete-orphan"
+    )
+
+    user: Mapped["User"] = relationship("User")
+
+    def __str__(self) -> str:
+        return f"Order #{self.id} - {self.status.value} - ${self.total_price}"
