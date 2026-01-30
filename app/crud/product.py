@@ -21,10 +21,8 @@ class ProductCRUD:
             product_data["slug"] = slugify(product_data["name"])
 
         product = Product(**product_data)
-
         session.add(product)
         await session.commit()
-
         await session.refresh(product)
         return product
 
@@ -65,7 +63,6 @@ class ProductCRUD:
         session.add(product)
         await session.commit()
         await session.refresh(product)
-
         return product
 
     async def delete_product(
