@@ -29,7 +29,7 @@ class CategoryAdmin(BaseAdmin, model=Category):
     column_list = [
         Category.name,
         Category.products,
-        Category.parent_id,
+        Category.id,
     ]
 
     async def insert_model(self, request, data):
