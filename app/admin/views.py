@@ -26,8 +26,11 @@ class UserAdmin(BaseAdmin, model=User):
 
 
 class CategoryAdmin(BaseAdmin, model=Category):
+    name_plural = "Categories"
+
     column_list = [
         Category.name,
+        Category.slug,
         Category.products,
         Category.id,
     ]

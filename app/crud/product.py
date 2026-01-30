@@ -1,7 +1,6 @@
-from typing import List
-
 from slugify import slugify
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Product
@@ -17,12 +16,17 @@ class ProductCRUD:
         """Создать новый продукт."""
         product_data = product_in.model_dump()
 
-        if not product_data.get("slug") or product_data["slug"] == "string":
+        if not product_data.get("slug"):
             product_data["slug"] = slugify(product_data["name"])
 
         product = Product(**product_data)
         session.add(product)
-        await session.commit()
+        try:
+            await session.commit()
+        except IntegrityError as exc:
+            await session.rollback()
+            raise exc
+
         await session.refresh(product)
         return product
 
@@ -39,9 +43,9 @@ class ProductCRUD:
         session: AsyncSession,
         offset: int = 0,
         limit: int = 20,
-    ) -> List[Product]:
+    ) -> list[Product]:
         """Получить все продукты."""
-        stmt = select(Product).offset(offset).limit(limit)
+        stmt = select(Product).order_by(Product.id).offset(offset).limit(limit)
         result = await session.execute(stmt)
         return list(result.scalars())
 
@@ -54,14 +58,20 @@ class ProductCRUD:
         """Обновить продукт по ID."""
         update_data = product_in.model_dump(exclude_unset=True)
 
-        if not update_data.get("slug") or update_data["slug"] == "string":
+        if "name" in update_data and not update_data.get("slug"):
             update_data["slug"] = slugify(update_data["name"])
 
         for field, value in update_data.items():
             setattr(product, field, value)
 
         session.add(product)
-        await session.commit()
+
+        try:
+            await session.commit()
+        except IntegrityError as exc:
+            await session.rollback()
+            raise exc
+
         await session.refresh(product)
         return product
 

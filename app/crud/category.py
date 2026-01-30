@@ -1,7 +1,6 @@
-from typing import List
-
 from slugify import slugify
 from sqlalchemy import select
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.models import Category
@@ -17,12 +16,18 @@ class CategoryCRUD:
         """Создать новую категорию."""
         category_data = category_in.model_dump()
 
-        if not category_data.get("slug") or category_data["slug"] == "string":
+        if not category_data.get("slug"):
             category_data["slug"] = slugify(category_data["name"])
 
         category = Category(**category_data)
         session.add(category)
-        await session.commit()
+
+        try:
+            await session.commit()
+        except IntegrityError as exc:
+            await session.rollback()
+            raise exc
+
         await session.refresh(category)
         return category
 
@@ -39,9 +44,9 @@ class CategoryCRUD:
         session: AsyncSession,
         offset: int = 0,
         limit: int = 20,
-    ) -> List[Category]:
+    ) -> list[Category]:
         """Получить список всех категорий."""
-        stmt = select(Category).offset(offset).limit(limit)
+        stmt = select(Category).order_by(Category.id).offset(offset).limit(limit)
         result = await session.execute(stmt)
         return list(result.scalars())
 
@@ -51,17 +56,23 @@ class CategoryCRUD:
         category: Category,
         category_in: CategoryUpdate,
     ) -> Category | None:
-        """Обновить продукт по ID."""
+        """Обновить категорию по ID."""
         update_data = category_in.model_dump(exclude_unset=True)
 
-        if not update_data.get("slug") or update_data["slug"] == "string":
+        if "name" in update_data and not update_data.get("slug"):
             update_data["slug"] = slugify(update_data["name"])
 
         for field, value in update_data.items():
             setattr(category, field, value)
 
         session.add(category)
-        await session.commit()
+
+        try:
+            await session.commit()
+        except IntegrityError as exc:
+            await session.rollback()
+            raise exc
+
         await session.refresh(category)
         return category
 

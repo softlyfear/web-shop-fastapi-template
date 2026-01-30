@@ -16,14 +16,8 @@ async def create_category(
     """Создать категорию."""
     try:
         return await category_crud.create_category(session, category_in)
-
-    except IntegrityError as e:
-        if "unique constraint" in str(e).lower() or "duplicate" in str(e).lower():
-            raise HTTPException(
-                status_code=status.HTTP_409_CONFLICT,
-                detail=f"Категория '{category_in.name}'"
-                f"или slug '{category_in.slug}' уже существует",
-            )
+    except IntegrityError:
+        raise HTTPException(status_code=409, detail="Slug или name уже существует")
 
 
 @router.get(
@@ -49,7 +43,7 @@ async def get_categories(
 @router.patch(
     "/{category_id}", response_model=CategoryRead, status_code=status.HTTP_200_OK
 )
-async def update_product(
+async def update_category(
     session: SessionDep,
     category_id: int,
     category_in: CategoryUpdate,
