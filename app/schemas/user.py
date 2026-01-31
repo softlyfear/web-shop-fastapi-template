@@ -1,29 +1,29 @@
 from datetime import datetime
+from typing import Annotated
 
-from pydantic import EmailStr
+from pydantic import EmailStr, Field
 
 from app.schemas import BaseSchema
 
 
 class UserBase(BaseSchema):
     email: EmailStr
-    username: str
-    is_active: bool
-    is_superuser: bool
+    username: Annotated[str, Field(min_length=3, max_length=20)]
 
 
 class UserCreate(UserBase):
-    password: str
+    password: Annotated[str, Field(min_length=4)]
 
 
 class UserUpdate(BaseSchema):
     email: EmailStr | None = None
     username: str | None = None
-    is_active: bool | None = None
-    is_superuser: bool | None = None
 
 
 class UserRead(UserBase):
     id: int
+    is_active: bool
+    is_superuser: bool
+
     created_at: datetime
     updated_at: datetime
