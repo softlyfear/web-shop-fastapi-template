@@ -15,10 +15,8 @@ class ProductCRUD:
     ) -> Product:
         """Создать новый продукт."""
         product_data = product_in.model_dump()
-
         if not product_data.get("slug"):
             product_data["slug"] = slugify(product_data["name"])
-
         product = Product(**product_data)
         session.add(product)
         try:
@@ -26,7 +24,6 @@ class ProductCRUD:
         except IntegrityError as exc:
             await session.rollback()
             raise exc
-
         await session.refresh(product)
         return product
 
@@ -57,21 +54,16 @@ class ProductCRUD:
     ) -> Product | None:
         """Обновить продукт по ID."""
         update_data = product_in.model_dump(exclude_unset=True)
-
         if "name" in update_data and not update_data.get("slug"):
             update_data["slug"] = slugify(update_data["name"])
-
         for field, value in update_data.items():
             setattr(product, field, value)
-
         session.add(product)
-
         try:
             await session.commit()
         except IntegrityError as exc:
             await session.rollback()
             raise exc
-
         await session.refresh(product)
         return product
 

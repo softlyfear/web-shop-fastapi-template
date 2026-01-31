@@ -17,7 +17,10 @@ async def create_products(
     try:
         return await product_crud.create_product(session, product_in)
     except IntegrityError:
-        raise HTTPException(status_code=409, detail="Slug или name уже существует")
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail="Slug или name уже существует",
+        )
 
 
 @router.get("/{product_id}", response_model=ProductRead, status_code=status.HTTP_200_OK)
@@ -29,7 +32,6 @@ async def get_product(
     product = await product_crud.get_product(session, product_id)
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-
     return product
 
 
@@ -55,7 +57,6 @@ async def update_product(
     product = await product_crud.get_product(session, product_id)
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-
     return await product_crud.update_product(session, product, product_in)
 
 
@@ -68,5 +69,4 @@ async def delete_product(
     product = await product_crud.get_product(session, product_id)
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-
     await product_crud.delete_product(session, product)

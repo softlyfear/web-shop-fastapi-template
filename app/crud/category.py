@@ -15,19 +15,15 @@ class CategoryCRUD:
     ) -> Category:
         """Создать новую категорию."""
         category_data = category_in.model_dump()
-
         if not category_data.get("slug"):
             category_data["slug"] = slugify(category_data["name"])
-
         category = Category(**category_data)
         session.add(category)
-
         try:
             await session.commit()
         except IntegrityError as exc:
             await session.rollback()
             raise exc
-
         await session.refresh(category)
         return category
 
@@ -58,21 +54,16 @@ class CategoryCRUD:
     ) -> Category | None:
         """Обновить категорию по ID."""
         update_data = category_in.model_dump(exclude_unset=True)
-
         if "name" in update_data and not update_data.get("slug"):
             update_data["slug"] = slugify(update_data["name"])
-
         for field, value in update_data.items():
             setattr(category, field, value)
-
         session.add(category)
-
         try:
             await session.commit()
         except IntegrityError as exc:
             await session.rollback()
             raise exc
-
         await session.refresh(category)
         return category
 

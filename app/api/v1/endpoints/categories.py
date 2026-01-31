@@ -52,7 +52,6 @@ async def update_category(
     category = await category_crud.get_category(session, category_id)
     if category is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-
     return await category_crud.update_category(session, category, category_in)
 
 
@@ -65,5 +64,4 @@ async def delete_category(
     category = await category_crud.get_category(session, category_id)
     if category is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-
     await category_crud.delete_category(session, category)
