@@ -17,14 +17,10 @@ class UserCRUD:
         user_data = user_in.model_dump(exclude={"password"})
         hashed = hash_password(user_in.password)
         user = User(**user_data, hashed_password=hashed)
-        user = User(**user_data, hashed_password=hashed)
         session.add(user)
         try:
             await session.commit()
         except IntegrityError as exc:
-            await session.rollback()
-            raise exc
-        except ValueError as exc:
             await session.rollback()
             raise exc
         await session.refresh(user)
@@ -41,8 +37,8 @@ class UserCRUD:
     async def get_users(
         self,
         session: AsyncSession,
-        offset: int = 20,
-        limit: int = 0,
+        offset: int = 0,
+        limit: int = 20,
     ) -> list[User]:
         """Получить список пользователей."""
         stmt = select(User).order_by(User.id).offset(offset).limit(limit)
@@ -55,7 +51,7 @@ class UserCRUD:
         user: User,
         user_in: UserUpdate,
     ) -> User | None:
-        """Обновить пользователя по ID"""
+        """Обновить пользователя по ID."""
         user_data = user_in.model_dump(exclude_unset=True)
         for field, value in user_data.items():
             setattr(user, field, value)

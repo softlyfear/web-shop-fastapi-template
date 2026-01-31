@@ -21,11 +21,6 @@ async def create_user(
             status_code=status.HTTP_409_CONFLICT,
             detail="Такой username или email уже существует",
         )
-    except ValueError:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Пароль не соответствует требованиям",
-        )
 
 
 @router.get("/{user_id}", response_model=UserRead, status_code=status.HTTP_200_OK)
