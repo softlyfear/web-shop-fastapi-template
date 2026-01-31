@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, status
-from sqlalchemy.exc import IntegrityError
 
 from app.core import SessionDep
 from app.crud import user_crud
@@ -14,13 +13,7 @@ async def create_user(
     user_in: UserCreate,
 ):
     """Создать нового пользователя."""
-    try:
-        return await user_crud.create_user(session, user_in)
-    except IntegrityError:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Такой username или email уже существует",
-        )
+    return await user_crud.create_user(session, user_in)
 
 
 @router.get("/{user_id}", response_model=UserRead, status_code=status.HTTP_200_OK)

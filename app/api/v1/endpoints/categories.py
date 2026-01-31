@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, status
-from sqlalchemy.exc import IntegrityError
 
 from app.core import SessionDep
 from app.crud import category_crud
@@ -14,10 +13,7 @@ async def create_category(
     session: SessionDep,
 ):
     """Создать категорию."""
-    try:
-        return await category_crud.create_category(session, category_in)
-    except IntegrityError:
-        raise HTTPException(status_code=409, detail="Slug или name уже существует")
+    return await category_crud.create_category(session, category_in)
 
 
 @router.get(

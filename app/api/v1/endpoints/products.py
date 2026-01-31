@@ -1,5 +1,4 @@
 from fastapi import APIRouter, HTTPException, status
-from sqlalchemy.exc import IntegrityError
 
 from app.core import SessionDep
 from app.crud import product_crud
@@ -14,13 +13,7 @@ async def create_products(
     session: SessionDep,
 ):
     """Создать продукт."""
-    try:
-        return await product_crud.create_product(session, product_in)
-    except IntegrityError:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Slug или name уже существует",
-        )
+    return await product_crud.create_product(session, product_in)
 
 
 @router.get("/{product_id}", response_model=ProductRead, status_code=status.HTTP_200_OK)
