@@ -17,5 +17,5 @@ class Review(Base, CreateAtMixin):
     rating: Mapped[int] = mapped_column(CheckConstraint("rating >= 1 AND rating <= 5"))
     comment: Mapped[str] = mapped_column(Text)
 
-    product: Mapped["Product"] = relationship("Product")
-    User: Mapped["User"] = relationship("User")
+    product: Mapped[Product] = relationship("Product")
+    User: Mapped[User] = relationship("User")

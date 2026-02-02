@@ -20,8 +20,8 @@ class OrderItem(Base):
     quantity: Mapped[int]
     price: Mapped[num_10_2]
 
-    order: Mapped["Order"] = relationship("Order", back_populates="items")
-    product: Mapped["Product"] = relationship("Product")
+    order: Mapped[Order] = relationship("Order", back_populates="items")
+    product: Mapped[Product] = relationship("Product")
 
     def __str__(self) -> str:
         return f"{self.quantity}x Product #{self.product_id} (${self.price})"

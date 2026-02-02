@@ -21,7 +21,7 @@ class Product(Base, CreateAtMixin, UpdateAtMixin):
     is_active: Mapped[bool] = mapped_column(server_default=text("true"))
     stock: Mapped[int] = mapped_column(default=0)
 
-    category: Mapped["Category"] = relationship("Category", back_populates="products")
+    category: Mapped[Category] = relationship("Category", back_populates="products")
 
     def __str__(self) -> str:
         return self.name

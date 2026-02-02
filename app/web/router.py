@@ -6,6 +6,6 @@ from app.web.home import router as home_router
 
 router = APIRouter()
 
-router.include_router(catalog_router, tags=["catalog"])
-router.include_router(home_router, tags=["home"])
-router.include_router(auth_router, tags=["auth"])
+router.include_router(catalog_router)
+router.include_router(home_router)
+router.include_router(auth_router)

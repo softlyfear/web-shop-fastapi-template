@@ -3,10 +3,10 @@ from fastapi.responses import HTMLResponse
 
 from app.core import templates
 
-router = APIRouter()
+router = APIRouter(prefix="/catalog", tags=["catalog"])
 
 
-@router.get("/catalogs/", response_class=HTMLResponse)
+@router.get("/", response_class=HTMLResponse)
 async def get_catalogs(request: Request) -> HTMLResponse:
     """Отображение страницы каталога товаров."""
     return templates.TemplateResponse(

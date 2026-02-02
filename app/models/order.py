@@ -29,11 +29,11 @@ class Order(Base, CreateAtMixin, UpdateAtMixin):
     total_price: Mapped[num_10_2]
     shipping_address: Mapped[str] = mapped_column(Text)
 
-    items: Mapped[list["OrderItem"]] = relationship(
+    items: Mapped[list[OrderItem]] = relationship(
         "OrderItem", back_populates="order", cascade="all, delete-orphan"
     )
 
-    user: Mapped["User"] = relationship("User")
+    user: Mapped[User] = relationship("User")
 
     def __str__(self) -> str:
         return f"Order #{self.id} - {self.status.value} - ${self.total_price}"

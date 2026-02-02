@@ -21,5 +21,5 @@ class AdminAuth(AuthenticationBackend):
     async def authenticate(self, request) -> bool:
         token = request.session.get("token")
         if token == "admin":
-            return True
+            return token == "admin"
         return False

@@ -3,10 +3,10 @@ from fastapi.responses import HTMLResponse
 
 from app.core import templates
 
-router = APIRouter()
+router = APIRouter(prefix="/login", tags=["auth"])
 
 
-@router.get("/login/", response_class=HTMLResponse, name="login")
+@router.get("/", response_class=HTMLResponse, name="login")
 async def get_login(request: Request) -> HTMLResponse:
     """Отображение страницы входа в систему."""
     return templates.TemplateResponse(

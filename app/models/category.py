@@ -14,7 +14,7 @@ class Category(Base, CreateAtMixin, UpdateAtMixin):
     name: Mapped[str_255] = mapped_column(unique=True)
     slug: Mapped[str_255 | None] = mapped_column(unique=True)
 
-    products: Mapped[list["Product"]] = relationship(
+    products: Mapped[list[Product]] = relationship(
         "Product",
         back_populates="category",
         cascade="all, delete-orphan",
