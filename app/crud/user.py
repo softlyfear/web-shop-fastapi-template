@@ -8,8 +8,8 @@ from app.schemas import UserCreate, UserUpdate
 
 
 class UserCRUD:
+    @staticmethod
     async def create_user(
-        self,
         session: AsyncSession,
         user_in: UserCreate,
     ) -> User:
@@ -26,16 +26,16 @@ class UserCRUD:
         await session.refresh(user)
         return user
 
+    @staticmethod
     async def get_user(
-        self,
         session: AsyncSession,
         user_id: int,
     ) -> User | None:
         """Получить пользователя по ID."""
         return await session.get(User, user_id)
 
+    @staticmethod
     async def get_users(
-        self,
         session: AsyncSession,
         offset: int = 0,
         limit: int = 20,
@@ -45,8 +45,8 @@ class UserCRUD:
         result = await session.execute(stmt)
         return list(result.scalars())
 
+    @staticmethod
     async def update_user(
-        self,
         session: AsyncSession,
         user: User,
         user_in: UserUpdate,
@@ -64,8 +64,8 @@ class UserCRUD:
         await session.refresh(user)
         return user
 
+    @staticmethod
     async def delete_user(
-        self,
         session: AsyncSession,
         user: User,
     ) -> None:

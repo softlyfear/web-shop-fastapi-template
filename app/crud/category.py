@@ -8,8 +8,8 @@ from app.schemas import CategoryCreate, CategoryUpdate
 
 
 class CategoryCRUD:
+    @staticmethod
     async def create_category(
-        self,
         session: AsyncSession,
         category_in: CategoryCreate,
     ) -> Category:
@@ -27,16 +27,16 @@ class CategoryCRUD:
         await session.refresh(category)
         return category
 
+    @staticmethod
     async def get_category(
-        self,
         session: AsyncSession,
         category_id: int,
     ) -> Category | None:
         """Получить категорию по ID."""
         return await session.get(Category, category_id)
 
+    @staticmethod
     async def get_categories(
-        self,
         session: AsyncSession,
         offset: int = 0,
         limit: int = 20,
@@ -46,8 +46,8 @@ class CategoryCRUD:
         result = await session.execute(stmt)
         return list(result.scalars())
 
+    @staticmethod
     async def update_category(
-        self,
         session: AsyncSession,
         category: Category,
         category_in: CategoryUpdate,
@@ -67,8 +67,8 @@ class CategoryCRUD:
         await session.refresh(category)
         return category
 
+    @staticmethod
     async def delete_category(
-        self,
         session: AsyncSession,
         category: Category,
     ) -> None:

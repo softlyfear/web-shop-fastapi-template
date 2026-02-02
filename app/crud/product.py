@@ -8,8 +8,8 @@ from app.schemas import ProductCreate, ProductUpdate
 
 
 class ProductCRUD:
+    @staticmethod
     async def create_product(
-        self,
         session: AsyncSession,
         product_in: ProductCreate,
     ) -> Product:
@@ -27,16 +27,16 @@ class ProductCRUD:
         await session.refresh(product)
         return product
 
+    @staticmethod
     async def get_product(
-        self,
         session: AsyncSession,
         product_id: int,
     ) -> Product | None:
         """Получить продукт по ID."""
         return await session.get(Product, product_id)
 
+    @staticmethod
     async def get_products(
-        self,
         session: AsyncSession,
         offset: int = 0,
         limit: int = 20,
@@ -46,8 +46,8 @@ class ProductCRUD:
         result = await session.execute(stmt)
         return list(result.scalars())
 
+    @staticmethod
     async def update_product(
-        self,
         session: AsyncSession,
         product: Product,
         product_in: ProductUpdate,
@@ -67,8 +67,8 @@ class ProductCRUD:
         await session.refresh(product)
         return product
 
+    @staticmethod
     async def delete_product(
-        self,
         session: AsyncSession,
         product: Product,
     ) -> None:
