@@ -70,7 +70,7 @@ class BaseCrud[
     ) -> ModelType:
         data = self._prepare_update_data(obj_in)
         for field, value in data.items():
-            if hasattr(field, value):
+            if hasattr(db_obj, value):
                 setattr(db_obj, field, value)
             else:
                 logger.warning(

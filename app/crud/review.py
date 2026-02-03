@@ -7,4 +7,4 @@ class ReviewCrud(BaseCrud[Review, ReviewCreate, ReviewUpdate]):
     pass
 
 
-review = ReviewCrud(Review)
+review_crud = ReviewCrud(Review)
