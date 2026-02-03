@@ -13,7 +13,7 @@ async def create_user(
     user_in: UserCreate,
 ):
     """Создать нового пользователя."""
-    return await user_crud.create_user(session, user_in)
+    return await user_crud.create(session, user_in)
 
 
 @router.get("/{user_id}", response_model=UserRead, status_code=status.HTTP_200_OK)
@@ -22,7 +22,7 @@ async def get_user(
     user_id: int,
 ):
     """Получить пользователя по ID."""
-    user = await user_crud.get_user(session, user_id)
+    user = await user_crud.get(session, user_id)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return user
@@ -35,7 +35,7 @@ async def get_users(
     limit: int = 20,
 ):
     """Получить всех пользователей."""
-    return await user_crud.get_users(session, offset, limit)
+    return await user_crud.get_multi(session, offset, limit)
 
 
 @router.patch("/{user_id}", response_model=UserRead, status_code=status.HTTP_200_OK)
@@ -45,10 +45,10 @@ async def update_user(
     user_in: UserUpdate,
 ):
     """Обновить пользователя по ID."""
-    user = await user_crud.get_user(session, user_id)
+    user = await user_crud.get(session, user_id)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    return await user_crud.update_user(session, user, user_in)
+    return await user_crud.update(session, user, user_in)
 
 
 @router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -57,7 +57,7 @@ async def delete_user(
     user_id: int,
 ):
     """Удалить пользователя по ID."""
-    user = await user_crud.get_user(session, user_id)
+    user = await user_crud.get(session, user_id)
     if user is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    await user_crud.delete_user(session, user)
+    await user_crud.delete(session, user)

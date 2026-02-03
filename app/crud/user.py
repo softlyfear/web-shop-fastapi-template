@@ -1,77 +1,14 @@
-from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
-
 from app.core.security import hash_password
+from app.crud import BaseCrud
 from app.models import User
 from app.schemas import UserCreate, UserUpdate
 
 
-class UserCRUD:
-    @staticmethod
-    async def create_user(
-        session: AsyncSession,
-        user_in: UserCreate,
-    ) -> User:
-        """Создать пользователя."""
-        user_data = user_in.model_dump(exclude={"password"})
-        hashed = hash_password(user_in.password)
-        user = User(**user_data, hashed_password=hashed)
-        session.add(user)
-        try:
-            await session.commit()
-        except IntegrityError as exc:
-            await session.rollback()
-            raise exc
-        await session.refresh(user)
-        return user
-
-    @staticmethod
-    async def get_user(
-        session: AsyncSession,
-        user_id: int,
-    ) -> User | None:
-        """Получить пользователя по ID."""
-        return await session.get(User, user_id)
-
-    @staticmethod
-    async def get_users(
-        session: AsyncSession,
-        offset: int = 0,
-        limit: int = 20,
-    ) -> list[User]:
-        """Получить список пользователей."""
-        stmt = select(User).order_by(User.id).offset(offset).limit(limit)
-        result = await session.execute(stmt)
-        return list(result.scalars())
-
-    @staticmethod
-    async def update_user(
-        session: AsyncSession,
-        user: User,
-        user_in: UserUpdate,
-    ) -> User | None:
-        """Обновить пользователя по ID."""
-        user_data = user_in.model_dump(exclude_unset=True)
-        for field, value in user_data.items():
-            setattr(user, field, value)
-        session.add(user)
-        try:
-            await session.commit()
-        except IntegrityError as exc:
-            await session.rollback()
-            raise exc
-        await session.refresh(user)
-        return user
-
-    @staticmethod
-    async def delete_user(
-        session: AsyncSession,
-        user: User,
-    ) -> None:
-        """Удалить пользователя по ID."""
-        await session.delete(user)
-        await session.commit()
+class UserCrud(BaseCrud[User, UserCreate, UserUpdate]):
+    def _prepare_create_data(self, obj_in: UserCreate) -> dict:
+        data = obj_in.model_dump(exclude={"password"})
+        data["hashed_password"] = hash_password(obj_in.password)
+        return data
 
 
-user_crud = UserCRUD()
+user_crud = UserCrud(User)

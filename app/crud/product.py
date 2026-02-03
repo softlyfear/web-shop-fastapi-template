@@ -1,80 +1,22 @@
 from slugify import slugify
-from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
-from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.crud import BaseCrud
 from app.models import Product
 from app.schemas import ProductCreate, ProductUpdate
 
 
-class ProductCRUD:
-    @staticmethod
-    async def create_product(
-        session: AsyncSession,
-        product_in: ProductCreate,
-    ) -> Product:
-        """Создать новый продукт."""
-        product_data = product_in.model_dump()
-        if not product_data.get("slug"):
-            product_data["slug"] = slugify(product_data["name"])
-        product = Product(**product_data)
-        session.add(product)
-        try:
-            await session.commit()
-        except IntegrityError as exc:
-            await session.rollback()
-            raise exc
-        await session.refresh(product)
-        return product
+class ProductCrud(BaseCrud[Product, ProductCreate, ProductUpdate]):
+    def _prepare_create_data(self, obj_in: ProductCreate) -> dict:
+        data = obj_in.model_dump()
+        if not data.get("slug"):
+            data["slug"] = slugify(data["name"])
+        return data
 
-    @staticmethod
-    async def get_product(
-        session: AsyncSession,
-        product_id: int,
-    ) -> Product | None:
-        """Получить продукт по ID."""
-        return await session.get(Product, product_id)
-
-    @staticmethod
-    async def get_products(
-        session: AsyncSession,
-        offset: int = 0,
-        limit: int = 20,
-    ) -> list[Product]:
-        """Получить все продукты."""
-        stmt = select(Product).order_by(Product.id).offset(offset).limit(limit)
-        result = await session.execute(stmt)
-        return list(result.scalars())
-
-    @staticmethod
-    async def update_product(
-        session: AsyncSession,
-        product: Product,
-        product_in: ProductUpdate,
-    ) -> Product | None:
-        """Обновить продукт по ID."""
-        update_data = product_in.model_dump(exclude_unset=True)
-        if "name" in update_data and not update_data.get("slug"):
-            update_data["slug"] = slugify(update_data["name"])
-        for field, value in update_data.items():
-            setattr(product, field, value)
-        session.add(product)
-        try:
-            await session.commit()
-        except IntegrityError as exc:
-            await session.rollback()
-            raise exc
-        await session.refresh(product)
-        return product
-
-    @staticmethod
-    async def delete_product(
-        session: AsyncSession,
-        product: Product,
-    ) -> None:
-        """Удалить продукт по ID."""
-        await session.delete(product)
-        await session.commit()
+    def _prepare_update_data(self, obj_in: ProductUpdate) -> dict:
+        data = obj_in.model_dump(exclude_unset=True)
+        if "name" in data and not data.get("slug"):
+            data["slug"] = slugify(data["name"])
+        return data
 
 
-product_crud = ProductCRUD()
+product_crud = ProductCrud(Product)

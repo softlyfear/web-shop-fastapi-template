@@ -13,7 +13,7 @@ async def create_category(
     session: SessionDep,
 ):
     """Создать категорию."""
-    return await category_crud.create_category(session, category_in)
+    return await category_crud.create(session, category_in)
 
 
 @router.get(
@@ -21,7 +21,7 @@ async def create_category(
 )
 async def get_category(session: SessionDep, category_id: int):
     """Получить категорию по ID."""
-    category = await category_crud.get_category(session, category_id)
+    category = await category_crud.get(session, category_id)
     if category is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return category
@@ -33,7 +33,7 @@ async def get_categories(
     offset: int = 0,
     limit: int = 20,
 ):
-    return await category_crud.get_categories(session, offset, limit)
+    return await category_crud.get_multi(session, offset, limit)
 
 
 @router.patch(
@@ -45,10 +45,10 @@ async def update_category(
     category_in: CategoryUpdate,
 ):
     """Обновление категории."""
-    category = await category_crud.get_category(session, category_id)
+    category = await category_crud.get(session, category_id)
     if category is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    return await category_crud.update_category(session, category, category_in)
+    return await category_crud.update(session, category, category_in)
 
 
 @router.delete("/{category_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -57,7 +57,7 @@ async def delete_category(
     category_id: int,
 ):
     """Удалить категорию по ID."""
-    category = await category_crud.get_category(session, category_id)
+    category = await category_crud.get(session, category_id)
     if category is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    await category_crud.delete_category(session, category)
+    await category_crud.delete(session, category)

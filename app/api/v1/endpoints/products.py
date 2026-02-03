@@ -13,7 +13,7 @@ async def create_products(
     session: SessionDep,
 ):
     """Создать продукт."""
-    return await product_crud.create_product(session, product_in)
+    return await product_crud.create(session, product_in)
 
 
 @router.get("/{product_id}", response_model=ProductRead, status_code=status.HTTP_200_OK)
@@ -22,7 +22,7 @@ async def get_product(
     session: SessionDep,
 ):
     """Получить продукт по ID."""
-    product = await product_crud.get_product(session, product_id)
+    product = await product_crud.get(session, product_id)
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
     return product
@@ -35,7 +35,7 @@ async def get_products(
     limit: int = 20,
 ):
     """Получить все продукты с пагинацией."""
-    return await product_crud.get_products(session, offset, limit)
+    return await product_crud.get_multi(session, offset, limit)
 
 
 @router.patch(
@@ -47,10 +47,10 @@ async def update_product(
     product_in: ProductUpdate,
 ):
     """Обновление продукта."""
-    product = await product_crud.get_product(session, product_id)
+    product = await product_crud.get(session, product_id)
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    return await product_crud.update_product(session, product, product_in)
+    return await product_crud.update(session, product, product_in)
 
 
 @router.delete("/{product_id}", status_code=status.HTTP_204_NO_CONTENT)
@@ -59,7 +59,7 @@ async def delete_product(
     product_id: int,
 ):
     """Удалить продукт по ID."""
-    product = await product_crud.get_product(session, product_id)
+    product = await product_crud.get(session, product_id)
     if product is None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
-    await product_crud.delete_product(session, product)
+    await product_crud.delete(session, product)
