@@ -6,7 +6,6 @@ from app.api.v1.endpoints.users import router as users_router
 
 router_v1 = APIRouter()
 
-
-router_v1.include_router(products_router)
-router_v1.include_router(categories_router)
-router_v1.include_router(users_router)
+router_v1.include_router(products_router, prefix="/products", tags=["products"])
+router_v1.include_router(categories_router, prefix="/categories", tags=["categories"])
+router_v1.include_router(users_router, prefix="/users", tags=["users"])
