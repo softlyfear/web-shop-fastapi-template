@@ -4,6 +4,7 @@ from pydantic import computed_field
 from pydantic_settings import BaseSettings
 
 BASE_DIR = Path(__file__).resolve().parents[2]
+CERTS_DIR = BASE_DIR / "app" / "core" / "certs"
 
 
 class DatabaseSettings(BaseSettings):
@@ -33,7 +34,6 @@ class DatabaseSettings(BaseSettings):
     model_config = {
         "env_prefix": "DB_",
         "env_file": BASE_DIR / ".env",
-        "env_file_encoding": "utf-8",
         "extra": "ignore",
     }
 
@@ -51,14 +51,23 @@ class AdminSettings(BaseSettings):
     model_config = {
         "env_prefix": "ADMIN_",
         "env_file": BASE_DIR / ".env",
-        "env_file_encoding": "utf-8",
         "extra": "ignore",
     }
+
+
+class AuthJWTSettings(BaseSettings):
+    private_key_path: Path = CERTS_DIR / "jwt-private.pem"
+    public_key_path: Path = CERTS_DIR / "jwt-public.pem"
+    algorithm: str = "RS256"
+    access_token_expire_minutes: int = 3
 
 
 class Settings(BaseSettings):
     db: DatabaseSettings = DatabaseSettings()  # type: ignore
     admin: AdminSettings = AdminSettings()  # type: ignore
+    auth_jwt: AuthJWTSettings = AuthJWTSettings()
 
 
 settings = Settings()
+
+print(settings.auth_jwt)
