@@ -7,4 +7,5 @@ router = build_crud_router(
     create_schema=OrderCreate,
     update_schema=OrderUpdate,
     read_schema=OrderRead,
+    resource_name="order",
 )

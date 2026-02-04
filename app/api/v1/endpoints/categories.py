@@ -7,4 +7,5 @@ router = build_crud_router(
     create_schema=CategoryCreate,
     update_schema=CategoryUpdate,
     read_schema=CategoryRead,
+    resource_name="category",
 )

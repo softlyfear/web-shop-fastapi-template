@@ -7,4 +7,5 @@ router = build_crud_router(
     create_schema=ReviewCreate,
     update_schema=ReviewUpdate,
     read_schema=ReviewRead,
+    resource_name="review",
 )

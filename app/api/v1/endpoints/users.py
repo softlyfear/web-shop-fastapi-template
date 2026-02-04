@@ -7,4 +7,5 @@ router = build_crud_router(
     create_schema=UserCreate,
     update_schema=UserUpdate,
     read_schema=UserRead,
+    resource_name="user",
 )
