@@ -1,96 +1,181 @@
 {% extends "base.html" %}
 
-{% block title %}Каталог товаров | Hop & Barley{% endblock %}
+{% block title %}AutoShop - Premium Vehicles{% endblock %}
 
 {% block content %}
+<!-- Hero Banner -->
 <section class="hero-banner">
-    <img src="{{ url_for('static', path='/img/background/hopfen-fields.jpg') }}" alt="Beautiful hops on a dark background" class="hero-banner__image">
+    <img src="{{ url_for('static', path='/img/background/car-showroom-banner.jpg') }}" alt="Luxury car showroom" class="hero-banner__image">
     <div class="hero-banner__overlay"></div>
+    <div class="hero-content">
+        <h1 class="hero-title">Find Your Dream Car</h1>
+        <p class="hero-subtitle">Premium vehicles at the best prices</p>
+    </div>
 </section>
 
-<div class="container main-content-grid">
-    <aside class="sidebar filter-menu">
-        <form method="get" action="{{ url_for('home') }}">
-            <div class="sidebar__section">
-                <h3 class="section-title">Search</h3>
-                <div class="keywords-list">
-                    <input type="text" name="search" class="search-input" placeholder="Type here..." value="{{ request.query_params.get('search', '') if request and request.query_params else '' }}">
-                </div>
-            </div>
+<!-- Categories Section -->
+{% if categories %}
+<section class="container" style="padding: 64px 0;">
+    <h2 class="section-heading" style="text-align: center; margin-bottom: 48px; font-size: 32px;">Shop by Category</h2>
+    <div class="categories-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 24px;">
+        {% for category in categories %}
+        <a href="{{ url_for('catalog') }}?category_id={{ category.id }}" class="category-card" style="text-decoration: none; padding: 32px; background: var(--background-default, #f5f5f5); border-radius: 12px; text-align: center; transition: transform 0.3s;">
+            <h3 style="font-size: 20px; margin-bottom: 8px; color: var(--text-primary, #333);">{{ category.name }}</h3>
+            {% if category.product_count %}
+            <p style="color: var(--grey-text, #666); font-size: 14px;">{{ category.product_count }} products</p>
+            {% endif %}
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
 
-            <div class="sidebar__section">
-                <h3 class="section-title">Categories</h3>
-                <div class="checkbox-group">
-                    {% if categories and categories|length > 0 %}
-                        {% for category in categories %}
-                        <label class="checkbox-container">{{ category.name }}
-                            <input type="checkbox" name="category" value="{{ category.slug }}" {% if request and request.query_params and category.slug in request.query_params.getlist('category') %}checked{% endif %}>
-                            <span class="checkmark"></span>
-                        </label>
-                        {% endfor %}
+<!-- Featured Products -->
+{% if featured_products %}
+<section class="container" style="padding: 64px 0; background: var(--background-light, #fafafa);">
+    <h2 class="section-heading" style="text-align: center; margin-bottom: 48px; font-size: 32px;">New Arrivals</h2>
+    <div class="product-grid">
+        {% for product in featured_products %}
+        <a href="{{ url_for('product_detail', slug=product.slug) }}" class="product-card-link">
+            <div class="product-card" style="position: relative;">
+                {% if product.stock <= 0 %}
+                <div style="position: absolute; top: 12px; right: 12px; background: #ef4444; color: white; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; z-index: 10;">
+                    Out of Stock
+                </div>
+                {% elif product.stock <= 5 %}
+                <div style="position: absolute; top: 12px; right: 12px; background: #f59e0b; color: white; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; z-index: 10;">
+                    Only {{ product.stock }} left
+                </div>
+                {% endif %}
+                <img src="{{ url_for('static', path='/img/products/' + (product.image or 'default.jpg')) }}" alt="{{ product.name }}" class="product-card__image" style="{% if product.stock <= 0 %}opacity: 0.6;{% endif %}">
+                <div class="product-card__info">
+                    <h4 class="product-card__name">{{ product.name }}</h4>
+                    <p class="product-card__price">${{ "%.2f"|format(product.price) }}</p>
+                    {% if product.description %}
+                    <p class="product-card__description">{{ product.description[:80] }}{% if product.description|length > 80 %}...{% endif %}</p>
+                    {% endif %}
+                    {% if product.stock > 0 %}
+                    <p style="color: #10b981; font-size: 13px; margin-top: 8px;">
+                        <i class="fa-solid fa-check-circle"></i> In stock: {{ product.stock }} units
+                    </p>
                     {% else %}
-                        <p class="text-muted">No categories available</p>
+                    <p style="color: #ef4444; font-size: 13px; margin-top: 8px;">
+                        <i class="fa-solid fa-times-circle"></i> Currently unavailable
+                    </p>
                     {% endif %}
                 </div>
             </div>
+        </a>
+        {% endfor %}
+    </div>
+    <div style="text-align: center; margin-top: 48px;">
+        <a href="{{ url_for('catalog') }}" class="button button--primary">View All Products</a>
+    </div>
+</section>
+{% endif %}
 
-            <div class="sidebar__section">
-                <h3 class="section-title">Price Range</h3>
-                <div class="price-range" style="display: flex; gap: 8px; align-items: center;">
-                    <input type="number" name="min_price" class="Input" placeholder="Min" value="{{ request.query_params.get('min_price', '') if request and request.query_params else '' }}" step="0.01" style="width: 80px;">
-                    <span>-</span>
-                    <input type="number" name="max_price" class="Input" placeholder="Max" value="{{ request.query_params.get('max_price', '') if request and request.query_params else '' }}" step="0.01" style="width: 80px;">
+<!-- Popular Products -->
+{% if popular_products %}
+<section class="container" style="padding: 64px 0;">
+    <h2 class="section-heading" style="text-align: center; margin-bottom: 48px; font-size: 32px;">Popular Choices</h2>
+    <div class="product-grid" style="grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));">
+        {% for product in popular_products %}
+        <a href="{{ url_for('product_detail', slug=product.slug) }}" class="product-card-link">
+            <div class="product-card" style="position: relative;">
+                {% if product.stock <= 0 %}
+                <div style="position: absolute; top: 12px; right: 12px; background: #ef4444; color: white; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; z-index: 10;">
+                    Out of Stock
                 </div>
-            </div>
-
-            <button type="submit" class="button button--primary" style="width: 100%;">Apply Filters</button>
-            <a href="{{ url_for('home') }}" class="button button--secondary" style="width: 100%; margin-top: 8px; text-decoration: none; display: flex; justify-content: center; align-items: center;">Clear All</a>
-        </form>
-    </aside>
-
-    <section class="products-area product-grid-section">
-        <div class="search-sort-bar">
-            <div class="results-count">
-                {% if products and products|length > 0 %}
-                    Showing {{ products|length }} products
-                {% else %}
-                    No products yet
+                {% elif product.stock <= 5 %}
+                <div style="position: absolute; top: 12px; right: 12px; background: #f59e0b; color: white; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; z-index: 10;">
+                    Only {{ product.stock }} left
+                </div>
                 {% endif %}
-            </div>
-            <div class="sort-options">
-                <span style="font-size: 14px; align-self: center; margin-right: 8px; color: var(--grey-text);">Sort by:</span>
-                <a href="{{ url_for('home') }}?sort=new" class="sort-button active-sort">
-                    <span>New</span>
-                </a>
-                <a href="{{ url_for('home') }}?sort=price_asc" class="sort-button">Price ↑</a>
-                <a href="{{ url_for('home') }}?sort=price_desc" class="sort-button">Price ↓</a>
-            </div>
-        </div>
-
-        <div class="product-grid">
-            {% if products and products|length > 0 %}
-                {% for product in products %}
-                <a href="#" class="product-card-link">
-                    <div class="product-card">
-                        <img src="{{ url_for('static', path='/img/products/' + (product.image if product.image else 'default.jpg')) }}" alt="{{ product.name }}" class="product-card__image">
-                        <div class="product-card__info">
-                            <h4 class="product-card__name">{{ product.name }}</h4>
-                            <p class="product-card__price">${{ "%.2f"|format(product.price) }}</p>
-                            <p class="product-card__description">{{ product.description[:80] if product.description else '' }}{% if product.description and product.description|length > 80 %}...{% endif %}</p>
-                        </div>
-                    </div>
-                </a>
-                {% endfor %}
-            {% else %}
-                <div class="no-products" style="grid-column: 1 / -1; text-align: center; padding: 64px; background: var(--background-default); border-radius: 8px;">
-                    <i class="fa-solid fa-box-open" style="font-size: 48px; color: var(--grey-text); margin-bottom: 16px;"></i>
-                    <p style="font-size: 18px; color: var(--grey-text);">No products available yet. Backend will provide product data.</p>
-                    <a href="{{ url_for('home') }}" class="button button--primary" style="display: inline-flex; margin-top: 24px;">Refresh</a>
+                <img src="{{ url_for('static', path='/img/products/' + (product.image or 'default.jpg')) }}" alt="{{ product.name }}" class="product-card__image" style="{% if product.stock <= 0 %}opacity: 0.6;{% endif %}">
+                <div class="product-card__info">
+                    <h4 class="product-card__name">{{ product.name }}</h4>
+                    <p class="product-card__price">${{ "%.2f"|format(product.price) }}</p>
+                    {% if product.description %}
+                    <p class="product-card__description">{{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}</p>
+                    {% endif %}
+                    {% if product.stock > 0 %}
+                    <p style="color: #10b981; font-size: 13px; margin-top: 8px;">
+                        <i class="fa-solid fa-check-circle"></i> In stock: {{ product.stock }} units
+                    </p>
+                    {% else %}
+                    <p style="color: #ef4444; font-size: 13px; margin-top: 8px;">
+                        <i class="fa-solid fa-times-circle"></i> Currently unavailable
+                    </p>
+                    {% endif %}
                 </div>
-            {% endif %}
-        </div>
+            </div>
+        </a>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
 
-        {# Pagination will be added by backend when needed #}
-    </section>
-</div>
+<!-- CTA Section -->
+<section class="cta-section" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 80px 0; text-align: center; color: white;">
+    <div class="container">
+        <h2 style="font-size: 36px; margin-bottom: 16px;">Drive Your Dream Car Today</h2>
+        <p style="font-size: 18px; margin-bottom: 32px; opacity: 0.9;">Discover the perfect vehicle from our premium collection</p>
+        <a href="{{ url_for('catalog') }}" class="button" style="background: white; color: #667eea; padding: 16px 48px; font-size: 18px; font-weight: 600;">Browse Catalog</a>
+    </div>
+</section>
+
+<style>
+    .hero-banner {
+        position: relative;
+        height: 500px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+    .hero-banner__image {
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+    .hero-banner__overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(0,0,0,0.6) 0%, rgba(0,0,0,0.3) 100%);
+    }
+    .hero-content {
+        position: relative;
+        z-index: 2;
+        text-align: center;
+        color: white;
+        max-width: 800px;
+        padding: 0 24px;
+    }
+    .hero-title {
+        font-size: 56px;
+        font-weight: 700;
+        margin-bottom: 16px;
+        text-shadow: 2px 2px 8px rgba(0,0,0,0.3);
+    }
+    .hero-subtitle {
+        font-size: 24px;
+        margin-bottom: 32px;
+        opacity: 0.95;
+    }
+    .button--large {
+        padding: 16px 48px;
+        font-size: 18px;
+        font-weight: 600;
+    }
+    .category-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+    @media (max-width: 768px) {
+        .hero-title { font-size: 36px; }
+        .hero-subtitle { font-size: 18px; }
+        .hero-banner { height: 400px; }
+    }
+</style>
 {% endblock %}

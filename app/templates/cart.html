@@ -1,42 +1,34 @@
 {% extends "base.html" %}
 
-{% block title %}Shopping Cart | Hop & Barley{% endblock %}
+{% block title %}Shopping Cart | AutoShop{% endblock %}
 
 {% block content %}
 <main class="cart-page-wrapper">
   <div class="cart-container">
     <h1 class="cart-title">Shopping Cart</h1>
 
-    {% if cart_items %}
+    {% if items %}
     <div class="cart-items-list" id="cart-items-list">
-      {% for item in cart_items %}
-      <div class="cart-item" data-price="{{ item.product.price }}" data-product-id="{{ item.product.id }}">
-        <img src="{{ url_for('static', path='/img/products/' + (item.product.image or 'default.jpg')) }}" alt="{{ item.product.name }}" class="cart-item__image">
+      {% for item in items %}
+      <div class="cart-item" data-price="{{ item.price }}" data-product-id="{{ item.product_id }}">
+        <img src="{{ url_for('static', path='/img/products/' + (item.image or 'default.jpg')) }}" alt="{{ item.name }}" class="cart-item__image">
         <div class="cart-item__body">
           <div class="cart-item__details">
-            <h2 class="cart-item__name">{{ item.product.name }}</h2>
+            <h2 class="cart-item__name">{{ item.name }}</h2>
             <div class="cart-item__price-info">
               <p class="cart-item__price" data-item-total-price>
-                ${{ "%.2f"|format(item.product.price * item.quantity) }}
+                ${{ "%.2f"|format(item.price * item.quantity) }}
               </p>
-              <span class="cart-item__price-tag">${{ "%.2f"|format(item.product.price) }} each</span>
+              <span class="cart-item__price-tag">${{ "%.2f"|format(item.price) }} each</span>
             </div>
           </div>
           <div class="cart-item__actions">
-            <form method="post" action="{{ url_for('cart_update') }}" class="quantity-form">
-              <input type="hidden" name="product_id" value="{{ item.product.id }}">
-              <div class="cart-item__quantity-selector">
-                <button type="submit" name="action" value="decrease" class="quantity-btn-cart" {% if item.quantity <= 1 %}disabled{% endif %}>
-                  <i class="fa-solid fa-minus"></i>
-                </button>
-                <span class="quantity-value-cart">{{ item.quantity }}</span>
-                <button type="submit" name="action" value="increase" class="quantity-btn-cart" {% if item.quantity >= item.product.stock %}disabled{% endif %}>
-                  <i class="fa-solid fa-plus"></i>
-                </button>
-              </div>
+            <form method="post" action="{{ url_for('cart_update') }}" class="quantity-form" style="display: flex; gap: 8px; align-items: center;">
+              <input type="hidden" name="product_id" value="{{ item.product_id }}">
+              <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.stock }}" style="width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+              <button type="submit" class="button button--secondary" style="padding: 8px 16px;">Update</button>
             </form>
-            <form method="post" action="{{ url_for('cart_remove') }}" class="remove-form">
-              <input type="hidden" name="product_id" value="{{ item.product.id }}">
+            <form method="post" action="{{ url_for('cart_remove', product_id=item.product_id) }}" class="remove-form">
               <button type="submit" class="button--remove">
                 Remove <i class="fa-solid fa-xmark"></i>
               </button>
@@ -49,7 +41,7 @@
 
     <div class="cart-summary">
       <div class="cart-summary__total">
-        <p>Total</p>
+        <p>Total ({{ total_items }} items)</p>
         <p id="cart-total-price">${{ "%.2f"|format(total_price) }}</p>
       </div>
       <a href="{{ url_for('checkout') }}" class="button button--primary button--checkout">Proceed to Checkout</a>
@@ -57,7 +49,7 @@
     {% else %}
     <div class="cart-empty">
       <p>Your cart is empty</p>
-      <a href="{{ url_for('home') }}" class="button button--primary">Continue Shopping</a>
+      <a href="{{ url_for('catalog') }}" class="button button--primary">Continue Shopping</a>
     </div>
     {% endif %}
   </div>

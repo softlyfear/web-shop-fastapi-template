@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+
+{% block title %}Каталог товаров | AutoShop{% endblock %}
+
+{% block content %}
+<section class="hero-banner">
+    <img src="{{ url_for('static', path='/img/background/car-showroom-banner.jpg') }}" alt="Luxury car showroom" class="hero-banner__image">
+    <div class="hero-banner__overlay"></div>
+</section>
+
+<div class="container main-content-grid">
+    <aside class="sidebar filter-menu">
+        <form method="get" action="{{ url_for('catalog') }}">
+            <div class="sidebar__section">
+                <h3 class="section-title">Search</h3>
+                <div class="keywords-list">
+                    <input type="text" name="search" class="search-input" placeholder="Type here..." value="{{ search or '' }}">
+                </div>
+            </div>
+
+            <div class="sidebar__section">
+                <h3 class="section-title">Categories</h3>
+                <div class="checkbox-group">
+                    {% if categories %}
+                        {% for category in categories %}
+                        <label class="checkbox-container">
+                            {{ category.name }}
+                            {% if category.product_count %}
+                                <span style="color: var(--grey-text); font-size: 12px;">({{ category.product_count }})</span>
+                            {% endif %}
+                            <input type="radio" name="category_id" value="{{ category.id }}" {% if category_id == category.id %}checked{% endif %}>
+                            <span class="checkmark"></span>
+                        </label>
+                        {% endfor %}
+                        {% if category_id %}
+                        <label class="checkbox-container">
+                            <span style="font-style: italic;">All categories</span>
+                            <input type="radio" name="category_id" value="">
+                            <span class="checkmark"></span>
+                        </label>
+                        {% endif %}
+                    {% else %}
+                        <p class="text-muted">No categories available</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="sidebar__section">
+                <h3 class="section-title">Price Range</h3>
+                <div class="price-range" style="display: flex; gap: 8px; align-items: center;">
+                    <input type="number" name="min_price" class="Input" placeholder="Min" value="{{ min_price or '' }}" step="0.01" style="width: 80px;">
+                    <span>-</span>
+                    <input type="number" name="max_price" class="Input" placeholder="Max" value="{{ max_price or '' }}" step="0.01" style="width: 80px;">
+                </div>
+            </div>
+
+            <button type="submit" class="button button--primary" style="width: 100%;">Apply Filters</button>
+            <a href="{{ url_for('catalog') }}" class="button button--secondary" style="width: 100%; margin-top: 8px; text-decoration: none; display: flex; justify-content: center; align-items: center;">Clear All</a>
+        </form>
+    </aside>
+
+    <section class="products-area product-grid-section">
+        <div class="search-sort-bar">
+            <div class="results-count">
+                {% if total_products %}
+                    Showing {{ products|length }} of {{ total_products }} products
+                {% else %}
+                    No products found
+                {% endif %}
+            </div>
+            <div class="sort-options">
+                <span style="font-size: 14px; align-self: center; margin-right: 8px; color: var(--grey-text);">Sort by:</span>
+                {% if sort_options %}
+                    {% for option in sort_options %}
+                    <a href="{{ url_for('catalog') }}?{{ 'search=' ~ search if search else '' }}{{ '&category_id=' ~ category_id if category_id else '' }}{{ '&min_price=' ~ min_price if min_price else '' }}{{ '&max_price=' ~ max_price if max_price else '' }}&sort={{ option.value }}"
+                       class="sort-button {% if sort == option.value %}active-sort{% endif %}">
+                        {{ option.label }}
+                    </a>
+                    {% endfor %}
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="product-grid">
+            {% if products %}
+                {% for product in products %}
+                <a href="{{ url_for('product_detail', slug=product.slug) }}" class="product-card-link">
+                    <div class="product-card" style="position: relative;">
+                        {% if product.stock <= 0 %}
+                        <div style="position: absolute; top: 12px; right: 12px; background: #ef4444; color: white; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; z-index: 10;">
+                            Out of Stock
+                        </div>
+                        {% elif product.stock <= 5 %}
+                        <div style="position: absolute; top: 12px; right: 12px; background: #f59e0b; color: white; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; z-index: 10;">
+                            Only {{ product.stock }} left
+                        </div>
+                        {% endif %}
+                        <img src="{{ url_for('static', path='/img/products/' + (product.image or 'default.jpg')) }}" alt="{{ product.name }}" class="product-card__image" style="{% if product.stock <= 0 %}opacity: 0.6;{% endif %}">
+                        <div class="product-card__info">
+                            <h4 class="product-card__name">{{ product.name }}</h4>
+                            <p class="product-card__price">${{ "%.2f"|format(product.price) }}</p>
+                            {% if product.description %}
+                            <p class="product-card__description">{{ product.description[:80] }}{% if product.description|length > 80 %}...{% endif %}</p>
+                            {% endif %}
+                            {% if product.stock > 0 %}
+                            <p style="color: #10b981; font-size: 13px; margin-top: 8px;">
+                                <i class="fa-solid fa-check-circle"></i> In stock: {{ product.stock }} units
+                            </p>
+                            {% else %}
+                            <p style="color: #ef4444; font-size: 13px; margin-top: 8px;">
+                                <i class="fa-solid fa-times-circle"></i> Currently unavailable
+                            </p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </a>
+                {% endfor %}
+            {% else %}
+                <div class="no-products" style="grid-column: 1 / -1; text-align: center; padding: 64px; background: var(--background-default); border-radius: 8px;">
+                    <i class="fa-solid fa-box-open" style="font-size: 48px; color: var(--grey-text); margin-bottom: 16px;"></i>
+                    <p style="font-size: 18px; color: var(--grey-text);">No products found matching your criteria.</p>
+                    <a href="{{ url_for('catalog') }}" class="button button--primary" style="display: inline-flex; margin-top: 24px;">Browse all products</a>
+                </div>
+            {% endif %}
+        </div>
+
+        {# Pagination #}
+        {% if total_pages > 1 %}
+        <div class="pagination">
+            {% if page > 1 %}
+            <a href="{{ url_for('catalog') }}?page={{ page - 1 }}{{ '&search=' ~ search if search else '' }}{{ '&category_id=' ~ category_id if category_id else '' }}{{ '&min_price=' ~ min_price if min_price else '' }}{{ '&max_price=' ~ max_price if max_price else '' }}{{ '&sort=' ~ sort if sort else '' }}"
+               class="pagination__link pagination__link--prev">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span>Previous</span>
+            </a>
+            {% endif %}
+
+            <div class="pagination-list">
+                {% for page_num in range(1, total_pages + 1) %}
+                    {% if page_num == page %}
+                        <span class="pagination__link active">{{ page_num }}</span>
+                    {% elif page_num == 1 or page_num == total_pages or (page_num >= page - 2 and page_num <= page + 2) %}
+                        <a href="{{ url_for('catalog') }}?page={{ page_num }}{{ '&search=' ~ search if search else '' }}{{ '&category_id=' ~ category_id if category_id else '' }}{{ '&min_price=' ~ min_price if min_price else '' }}{{ '&max_price=' ~ max_price if max_price else '' }}{{ '&sort=' ~ sort if sort else '' }}"
+                           class="pagination__link">{{ page_num }}</a>
+                    {% elif page_num == page - 3 or page_num == page + 3 %}
+                        <span class="pagination__dots">...</span>
+                    {% endif %}
+                {% endfor %}
+            </div>
+
+            {% if page < total_pages %}
+            <a href="{{ url_for('catalog') }}?page={{ page + 1 }}{{ '&search=' ~ search if search else '' }}{{ '&category_id=' ~ category_id if category_id else '' }}{{ '&min_price=' ~ min_price if min_price else '' }}{{ '&max_price=' ~ max_price if max_price else '' }}{{ '&sort=' ~ sort if sort else '' }}"
+               class="pagination__link pagination__link--next">
+                <span>Next</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

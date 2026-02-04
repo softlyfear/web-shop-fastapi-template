@@ -26,6 +26,7 @@ dependencies = [
     "pyjwt[crypto]>=2.11.0",
     "black>=26.1.0",
     "python-multipart>=0.0.22",
+    "aiofiles>=25.1.0",
 ]
 
 [tool.mypy]

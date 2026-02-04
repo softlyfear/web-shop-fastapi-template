@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}{{ product.name }} | Hop & Barley{% endblock %}
+{% block title %}{{ product.name }} | AutoShop{% endblock %}
 
 {% block content %}
 <main class="page-product">
@@ -30,28 +30,26 @@
         </div>
         <div class="cart-controls">
           {% if product.stock > 0 %}
-          <form method="post" action="{{ url_for('cart_add') }}" class="add-to-cart-form">
-            <input type="hidden" name="product_id" value="{{ product.id }}">
-            <input type="hidden" name="quantity" value="1" id="product-quantity">
-            <button type="submit" class="button button--primary add-to-cart-button" id="add-to-cart-btn">
-              <i class="fa-solid fa-cart-shopping"></i>
-              <span>Add to Cart</span>
-            </button>
+          <form method="post" action="{{ url_for('product_add_to_cart', slug=product.slug) }}" class="add-to-cart-form">
+            <div style="display: flex; gap: 12px; align-items: center;">
+              <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" style="width: 80px; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+              <button type="submit" class="button button--primary add-to-cart-button">
+                <i class="fa-solid fa-cart-shopping"></i>
+                <span>Add to Cart</span>
+              </button>
+            </div>
           </form>
-          <div class="quantity-counter is-hidden" id="quantity-counter">
-            <form method="post" action="{{ url_for('cart_update') }}" class="quantity-form">
-              <input type="hidden" name="product_id" value="{{ product.id }}">
-              <button type="submit" name="action" value="decrease" class="quantity-btn" aria-label="Decrease quantity">
-                <i class="fa-solid fa-minus"></i>
-              </button>
-              <span class="quantity-value">1 in cart</span>
-              <button type="submit" name="action" value="increase" class="quantity-btn" aria-label="Increase quantity">
-                <i class="fa-solid fa-plus"></i>
-              </button>
-            </form>
-          </div>
           {% else %}
-          <button class="button button--primary" disabled>Out of Stock</button>
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <button class="button button--primary" disabled style="opacity: 0.6; cursor: not-allowed;">
+              <i class="fa-solid fa-times-circle"></i>
+              <span>Out of Stock</span>
+            </button>
+            <a href="{{ url_for('catalog') }}" class="button button--secondary" style="text-decoration: none; display: flex; align-items: center; justify-content: center; gap: 8px;">
+              <i class="fa-solid fa-arrow-left"></i>
+              <span>Back to Catalog</span>
+            </a>
+          </div>
           {% endif %}
         </div>
       </div>
@@ -66,7 +64,6 @@
         </div>
         <div class="accordion-content">
           <ul>
-            <li><strong>Category:</strong> {{ product.category.name if product.category else 'N/A' }}</li>
             <li><strong>Price:</strong> ${{ "%.2f"|format(product.price) }}</li>
             <li><strong>Stock:</strong> {{ product.stock }} units</li>
             <li><strong>SKU:</strong> {{ product.slug }}</li>
@@ -77,7 +74,26 @@
 
     <!-- Reviews Section -->
     <section class="reviews-section">
-      <h2 class="reviews-title">Reviews</h2>
+      <div class="reviews-header">
+        <h2 class="reviews-title">Customer Reviews</h2>
+        {% if avg_rating and total_reviews > 0 %}
+        <div class="average-rating">
+          <div class="rating-number">{{ "%.1f"|format(avg_rating) }}</div>
+          <div class="rating-stars">
+            {% for i in range(5) %}
+              {% if i < avg_rating|int %}
+                <i class="fa-solid fa-star"></i>
+              {% elif i < avg_rating %}
+                <i class="fa-solid fa-star-half-stroke"></i>
+              {% else %}
+                <i class="fa-regular fa-star"></i>
+              {% endif %}
+            {% endfor %}
+          </div>
+          <div class="rating-count">Based on {{ total_reviews }} review{{ 's' if total_reviews != 1 else '' }}</div>
+        </div>
+        {% endif %}
+      </div>
 
       {% if reviews %}
       <div class="reviews-list">
@@ -106,13 +122,13 @@
       <p class="no-reviews">No reviews yet. Be the first to review this product!</p>
       {% endif %}
 
-      {% if current_user and can_review %}
+      {% if can_review %}
       <div class="review-form-container">
         <h3>Write a Review</h3>
-        <form method="post" action="{{ url_for('product_review', slug=product.slug) }}" class="review-form">
+        <form method="post" action="{{ url_for('product_add_review', slug=product.slug) }}" class="review-form">
           <div class="InputField">
             <label for="rating">Rating</label>
-            <select name="rating" id="rating" required>
+            <select name="rating" id="rating" required class="Input">
               <option value="">Select rating</option>
               <option value="5">5 - Excellent</option>
               <option value="4">4 - Very Good</option>
@@ -122,14 +138,16 @@
             </select>
           </div>
           <div class="InputField">
-            <label for="comment">Comment</label>
-            <textarea name="comment" id="comment" rows="5" required></textarea>
+            <label for="comment">Comment (optional)</label>
+            <textarea name="comment" id="comment" rows="5" class="Input" placeholder="Share your thoughts about this product..."></textarea>
           </div>
           <button type="submit" class="button button--primary">Submit Review</button>
         </form>
       </div>
-      {% elif current_user and not can_review %}
-      <p class="review-note">You can only review products you have purchased.</p>
+      {% elif user_review %}
+      <p class="review-note">You have already reviewed this product.</p>
+      {% elif request.session.get('user_id') %}
+      <p class="review-note">Purchase this product to leave a review.</p>
       {% else %}
       <p class="review-note">Please <a href="{{ url_for('login') }}">sign in</a> to write a review.</p>
       {% endif %}

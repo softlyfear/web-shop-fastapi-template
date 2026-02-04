@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Order #{{ order.id }} | AutoShop{% endblock %}
+
+{% block content %}
+<div class="container" style="padding: 48px 0;">
+    <div class="account-layout" style="display: grid; grid-template-columns: 250px 1fr; gap: 32px;">
+        <!-- Sidebar -->
+        <aside class="account-sidebar">
+            <nav class="account-nav">
+                <a href="{{ url_for('account') }}" class="account-nav__link">Dashboard</a>
+                <a href="{{ url_for('account_orders') }}" class="account-nav__link account-nav__link--active">My Orders</a>
+                <a href="{{ url_for('account_profile') }}" class="account-nav__link">Profile Settings</a>
+                <a href="{{ url_for('account_password') }}" class="account-nav__link">Change Password</a>
+                <a href="{{ url_for('logout') }}" class="account-nav__link">Logout</a>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="account-content">
+            <div style="margin-bottom: 24px;">
+                <a href="{{ url_for('account_orders') }}" style="text-decoration: none; color: var(--primary-color, #667eea);">
+                    <i class="fa-solid fa-arrow-left"></i> Back to Orders
+                </a>
+            </div>
+
+            <div class="order-detail-header" style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 32px;">
+                <div>
+                    <h1 style="font-size: 28px; margin-bottom: 8px;">Order #{{ order.id }}</h1>
+                    <p style="color: var(--grey-text, #666);">Placed on {{ order.created_at.strftime('%B %d, %Y at %I:%M %p') if order.created_at else '' }}</p>
+                </div>
+                <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 12px;">
+                    <span class="order-status status-{{ order.status.value }}" style="padding: 8px 20px; border-radius: 20px; font-size: 14px; font-weight: 500;">
+                        {{ order.status.value|title }}
+                    </span>
+                    {% if order.status.value == 'pending' %}
+                    <form method="post" action="{{ url_for('account_order_cancel', order_id=order.id) }}" onsubmit="return confirm('Are you sure you want to cancel this order?');">
+                        <button type="submit" class="button button--secondary" style="background: #dc2626; color: white; border: none;">
+                            <i class="fa-solid fa-times"></i> Cancel Order
+                        </button>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <section class="order-section" style="background: var(--background-default, #f5f5f5); padding: 24px; border-radius: 8px; margin-bottom: 24px;">
+                <h2 style="font-size: 20px; margin-bottom: 16px;">Order Items</h2>
+                <div class="order-items-list">
+                    {% for item in order.items %}
+                    <div class="order-item" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; background: white; border-radius: 8px; margin-bottom: 12px;">
+                        <div style="display: flex; gap: 16px; align-items: center;">
+                            <div style="font-weight: 500;">{{ item.product.name if item.product else 'Product' }}</div>
+                            <div style="color: var(--grey-text, #666); font-size: 14px;">x{{ item.quantity }}</div>
+                        </div>
+                        <div>
+                            <div style="font-weight: 500;">${{ "%.2f"|format(item.price) }}</div>
+                            <div style="color: var(--grey-text, #666); font-size: 12px;">each</div>
+                        </div>
+                        <div style="font-weight: 600; font-size: 18px;">${{ "%.2f"|format(item.price * item.quantity) }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <div class="order-total" style="display: flex; justify-content: space-between; align-items: center; padding-top: 16px; border-top: 2px solid #ddd; margin-top: 16px;">
+                    <span style="font-size: 20px; font-weight: 600;">Total:</span>
+                    <span style="font-size: 24px; font-weight: 700; color: var(--primary-color, #667eea);">${{ "%.2f"|format(order.total_price) }}</span>
+                </div>
+            </section>
+
+            <!-- Shipping Information -->
+            <section class="order-section" style="background: var(--background-default, #f5f5f5); padding: 24px; border-radius: 8px;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                    <h2 style="font-size: 20px;">Shipping Information</h2>
+                    {% if order.status.value == 'pending' %}
+                    <button type="button" onclick="toggleEditForm()" class="button button--secondary" style="font-size: 14px; padding: 8px 16px;">
+                        <i class="fa-solid fa-edit"></i> Edit Address
+                    </button>
+                    {% endif %}
+                </div>
+                <div id="address-display" style="background: white; padding: 16px; border-radius: 8px;">
+                    <p style="white-space: pre-line; line-height: 1.6;">{{ order.shipping_address }}</p>
+                </div>
+
+                {% if order.status.value == 'pending' %}
+                <div id="address-edit-form" style="display: none; margin-top: 16px;">
+                    <form method="post" action="{{ url_for('account_order_edit', order_id=order.id) }}" style="background: white; padding: 20px; border-radius: 8px;">
+                        <div class="InputField" style="margin-bottom: 16px;">
+                            <label for="shipping_address" style="display: block; margin-bottom: 8px; font-weight: 500;">New Shipping Address</label>
+                            <textarea name="shipping_address" id="shipping_address" rows="4" required class="Input" style="width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 6px; font-family: inherit;">{{ order.shipping_address }}</textarea>
+                            <small style="color: var(--grey-text, #666); font-size: 13px;">Minimum 10 characters</small>
+                        </div>
+                        <div style="display: flex; gap: 12px;">
+                            <button type="submit" class="button button--primary">
+                                <i class="fa-solid fa-save"></i> Save Changes
+                            </button>
+                            <button type="button" onclick="toggleEditForm()" class="button button--secondary">
+                                <i class="fa-solid fa-times"></i> Cancel
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {% endif %}
+            </section>
+        </main>
+    </div>
+</div>
+
+<style>
+    .account-nav {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+    .account-nav__link {
+        padding: 12px 16px;
+        text-decoration: none;
+        color: var(--text-primary, #333);
+        border-radius: 8px;
+        transition: background 0.2s;
+    }
+    .account-nav__link:hover {
+        background: var(--background-default, #f5f5f5);
+    }
+    .account-nav__link--active {
+        background: var(--primary-color, #667eea);
+        color: white;
+    }
+    .status-pending { background: #fef3c7; color: #92400e; }
+    .status-processing { background: #dbeafe; color: #1e40af; }
+    .status-shipped { background: #e0e7ff; color: #3730a3; }
+    .status-delivered { background: #d1fae5; color: #065f46; }
+    .status-cancelled { background: #fee2e2; color: #991b1b; }
+    .status-paid { background: #d1fae5; color: #065f46; }
+</style>
+
+<script>
+function toggleEditForm() {
+    const display = document.getElementById('address-display');
+    const editForm = document.getElementById('address-edit-form');
+
+    if (editForm.style.display === 'none') {
+        display.style.display = 'none';
+        editForm.style.display = 'block';
+    } else {
+        display.style.display = 'block';
+        editForm.style.display = 'none';
+    }
+}
+</script>
+{% endblock %}

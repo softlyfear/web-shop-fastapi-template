@@ -1,6 +1,6 @@
 from typing import TYPE_CHECKING
 
-from sqlalchemy import ForeignKey, Text, text
+from sqlalchemy import ForeignKey, String, Text, text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 if TYPE_CHECKING:
@@ -17,7 +17,7 @@ class Product(Base, CreateAtMixin, UpdateAtMixin):
     category_id: Mapped[int] = mapped_column(
         ForeignKey("categories.id", ondelete="CASCADE")
     )
-    image: Mapped[str_255 | None]
+    image: Mapped[str | None] = mapped_column(String(500), nullable=True)
     is_active: Mapped[bool] = mapped_column(server_default=text("true"))
     stock: Mapped[int] = mapped_column(default=0)
 

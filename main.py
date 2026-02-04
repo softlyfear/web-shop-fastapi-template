@@ -8,7 +8,7 @@ from app.api import router_v1
 from app.core import register_exception_handlers, settings
 from app.web import router as web_router
 
-app = FastAPI()
+app = FastAPI(title="FastApi Shop")
 app.add_middleware(SessionMiddleware, secret_key=settings.admin.SECRET_KEY)
 setup_admin(app)
 

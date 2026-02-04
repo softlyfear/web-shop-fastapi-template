@@ -19,3 +19,8 @@ class TokenPair(BaseModel):
 
 class RefreshRequest(BaseModel):
     refresh_token: str
+
+
+class PasswordUpdate(BaseModel):
+    current_password: str
+    new_password: str

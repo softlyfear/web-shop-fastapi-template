@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}Register | Hop & Barley{% endblock %}
+{% block title %}Register | AutoShop{% endblock %}
 
 {% block content %}
 <main class="auth-page-wrapper">
     <div class="auth-background">
-        <img src="{{ url_for('static', path='/img/background/pattern.jpg') }}" alt="Background pattern">
+        <img src="{{ url_for('static', path='/img/background/automotive-pattern.jpg') }}" alt="Background pattern">
     </div>
     <div class="auth-form-container">
         <div class="auth-container auth-container--register">
@@ -19,18 +19,18 @@
             </div>
             {% endif %}
 
-            <form class="auth-form" method="post" action="{{ url_for('register') }}">
+            <form class="auth-form" method="post" action="{{ url_for('register_process') }}">
+                <div class="InputField">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" name="username" class="Input" placeholder="Username" required minlength="3" maxlength="20">
+                </div>
                 <div class="InputField">
                     <label for="email">Email</label>
                     <input type="email" id="email" name="email" class="Input" placeholder="Email" required>
                 </div>
                 <div class="InputField">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" name="username" class="Input" placeholder="Username" required>
-                </div>
-                <div class="InputField">
                     <label for="password">Password</label>
-                    <input type="password" id="password" name="password" class="Input" placeholder="Password" required>
+                    <input type="password" id="password" name="password" class="Input" placeholder="Password" required minlength="4">
                 </div>
                 <div class="InputField">
                     <label for="password_confirm">Confirm Password</label>

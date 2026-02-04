@@ -15,7 +15,7 @@ class Review(Base, CreateAtMixin):
     )
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     rating: Mapped[int] = mapped_column(CheckConstraint("rating >= 1 AND rating <= 5"))
-    comment: Mapped[str] = mapped_column(Text)
+    comment: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     product: Mapped[Product] = relationship("Product")
     User: Mapped[User] = relationship("User")

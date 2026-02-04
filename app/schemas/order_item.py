@@ -7,11 +7,11 @@ from app.schemas import BaseSchema
 class OrderItemBase(BaseSchema):
     product_id: int
     quantity: int
-    price: Decimal
+    price: Decimal | None = None
 
 
 class OrderItemCreate(OrderItemBase):
-    pass
+    order_id: int | None = None
 
 
 class OrderItemUpdate(BaseSchema):

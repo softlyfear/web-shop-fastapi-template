@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Checkout | Hop & Barley{% endblock %}
+{% block title %}Checkout | AutoShop{% endblock %}
 
 {% block content %}
 <main class="checkout-page-wrapper">
@@ -13,26 +13,15 @@
         </div>
         {% endif %}
 
-        {% if cart_items %}
-        <form method="post" action="{{ url_for('checkout') }}" id="checkout-form">
+        {% if items %}
+        <form method="post" action="{{ url_for('checkout_process') }}" id="checkout-form">
             <!-- Shipping Information -->
             <section class="checkout-section">
                 <h2 class="checkout-section__title">Shipping information</h2>
                 <div class="checkout-form-group">
-                    <label for="full-name">Full Name</label>
-                    <input type="text" id="full-name" name="full_name" class="Input" placeholder="Full Name" value="{{ current_user.full_name if current_user else '' }}" required>
-                </div>
-                <div class="checkout-form-group">
-                    <label for="phone">Phone number</label>
-                    <input type="tel" id="phone" name="phone" class="Input" placeholder="Phone Number" required>
-                </div>
-                <div class="checkout-form-group">
-                    <label for="city">City</label>
-                    <input type="text" id="city" name="city" class="Input" placeholder="City" required>
-                </div>
-                <div class="checkout-form-group">
-                    <label for="address">Shipping address</label>
-                    <textarea id="address" name="address" class="Textarea" placeholder="Shipping Address" rows="3" required></textarea>
+                    <label for="shipping_address">Shipping Address (minimum 10 characters)</label>
+                    <textarea id="shipping_address" name="shipping_address" class="Textarea" placeholder="Enter your full shipping address including street, city, state, and postal code" rows="4" required minlength="10"></textarea>
+                    <small style="color: var(--grey-text, #666); font-size: 12px;">Please provide a complete address for delivery</small>
                 </div>
             </section>
 
@@ -41,19 +30,19 @@
                 <h2 class="checkout-section__title">Payment Method</h2>
                 <div class="payment-options">
                     <label class="radio-option">
-                        <input type="radio" name="payment_method" value="debit" checked>
-                        <span class="radio-custom"></span>
-                        <span class="radio-label">Debit Card</span>
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="payment_method" value="wallet">
-                        <span class="radio-custom"></span>
-                        <span class="radio-label">Digital Wallet</span>
-                    </label>
-                    <label class="radio-option">
-                        <input type="radio" name="payment_method" value="cod">
+                        <input type="radio" name="payment_method" value="cash" checked>
                         <span class="radio-custom"></span>
                         <span class="radio-label">Cash On Delivery</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="payment_method" value="card">
+                        <span class="radio-custom"></span>
+                        <span class="radio-label">Credit/Debit Card</span>
+                    </label>
+                    <label class="radio-option">
+                        <input type="radio" name="payment_method" value="paypal">
+                        <span class="radio-custom"></span>
+                        <span class="radio-label">PayPal</span>
                     </label>
                 </div>
             </section>
@@ -62,16 +51,16 @@
             <section class="checkout-summary">
                 <h2 class="checkout-section__title">Order Summary</h2>
                 <div class="order-items-summary">
-                    {% for item in cart_items %}
+                    {% for item in items %}
                     <div class="summary-item">
-                        <span>{{ item.product.name }} x{{ item.quantity }}</span>
-                        <span>${{ "%.2f"|format(item.product.price * item.quantity) }}</span>
+                        <span>{{ item.name }} x{{ item.quantity }}</span>
+                        <span>${{ "%.2f"|format(item.price * item.quantity) }}</span>
                     </div>
                     {% endfor %}
                 </div>
                 <div class="summary-details">
                     <div class="summary-total">
-                        <p>Total</p>
+                        <p>Total ({{ total_items }} items)</p>
                         <p>${{ "%.2f"|format(total_price) }}</p>
                     </div>
                     <button type="submit" class="button button--primary button--pay">Place Order</button>
@@ -81,7 +70,7 @@
         {% else %}
         <div class="checkout-empty">
             <p>Your cart is empty</p>
-            <a href="{{ url_for('home') }}" class="button button--primary">Continue Shopping</a>
+            <a href="{{ url_for('catalog') }}" class="button button--primary">Continue Shopping</a>
         </div>
         {% endif %}
     </div>

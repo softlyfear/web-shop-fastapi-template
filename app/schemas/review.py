@@ -7,7 +7,7 @@ class ReviewBase(BaseSchema):
     product_id: int
     user_id: int
     rating: int
-    comment: str
+    comment: str | None
 
 
 class ReviewCreate(ReviewBase):

@@ -5,6 +5,12 @@ from app.schemas.auth import (
     TokenPair,
 )
 from app.schemas.base import BaseSchema
+from app.schemas.carts import (
+    CartItemAdd,
+    CartItemResponse,
+    CartItemUpdate,
+    CartResponse,
+)
 from app.schemas.category import (
     CategoryBase,
     CategoryCreate,
@@ -54,4 +60,8 @@ __all__ = [
     "LoginRequest",
     "RefreshRequest",
     "UserInfo",
+    "CartItemAdd",
+    "CartItemUpdate",
+    "CartItemResponse",
+    "CartResponse",
 ]
