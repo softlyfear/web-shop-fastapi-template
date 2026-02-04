@@ -23,6 +23,9 @@ dependencies = [
     "sqlalchemy>=2.0.45",
     "uvicorn>=0.40.0",
     "mypy>=1.19.1",
+    "pyjwt[crypto]>=2.11.0",
+    "black>=26.1.0",
+    "python-multipart>=0.0.22",
 ]
 
 [tool.mypy]

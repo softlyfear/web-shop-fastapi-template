@@ -168,3 +168,6 @@ Project M3 FastAPI.md
 
 # VsCode
 .vscode
+
+/app/core/certs/jwt-private.pem
+/app/core/certs/jwt-public.pem
