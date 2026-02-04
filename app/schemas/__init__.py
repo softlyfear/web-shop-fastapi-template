@@ -1,3 +1,9 @@
+from app.schemas.auth import (
+    LoginRequest,
+    RefreshRequest,
+    TokenInfo,
+    TokenPair,
+)
 from app.schemas.base import BaseSchema
 from app.schemas.category import (
     CategoryBase,
@@ -14,7 +20,7 @@ from app.schemas.order_item import (
 )
 from app.schemas.product import ProductBase, ProductCreate, ProductRead, ProductUpdate
 from app.schemas.review import ReviewBase, ReviewCreate, ReviewRead, ReviewUpdate
-from app.schemas.user import UserBase, UserCreate, UserRead, UserUpdate
+from app.schemas.user import UserBase, UserCreate, UserInfo, UserRead, UserUpdate
 
 __all__ = [
     "BaseSchema",
@@ -43,4 +49,9 @@ __all__ = [
     "UserCreate",
     "UserRead",
     "UserUpdate",
+    "TokenInfo",
+    "TokenPair",
+    "LoginRequest",
+    "RefreshRequest",
+    "UserInfo",
 ]

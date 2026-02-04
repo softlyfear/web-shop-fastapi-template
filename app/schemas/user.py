@@ -27,3 +27,9 @@ class UserRead(UserBase):
 
     created_at: datetime
     updated_at: datetime
+
+
+class UserInfo(BaseSchema):
+    username: str
+    email: str
+    logged_in_at: int | None

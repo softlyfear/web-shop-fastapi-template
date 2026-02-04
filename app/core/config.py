@@ -39,8 +39,6 @@ class DatabaseSettings(BaseSettings):
 
 
 class AdminSettings(BaseSettings):
-    USERNAME: str
-    PASSWORD: str
     SECRET_KEY: str
 
     CAN_CREATE: bool
@@ -59,7 +57,26 @@ class AuthJWTSettings(BaseSettings):
     private_key_path: Path = CERTS_DIR / "jwt-private.pem"
     public_key_path: Path = CERTS_DIR / "jwt-public.pem"
     algorithm: str = "RS256"
-    access_token_expire_minutes: int = 3
+    access_token_expire_minutes: int
+    refresh_token_expire_days: int
+
+    @property
+    def private_key(self) -> str:
+        if not hasattr(self, "_private_key"):
+            self._private_key = self.private_key_path.read_text()
+        return self._private_key
+
+    @property
+    def public_key(self) -> str:
+        if not hasattr(self, "_public_key"):
+            self._public_key = self.public_key_path.read_text()
+        return self._public_key
+
+    model_config = {
+        "env_prefix": "AUTHJWT_",
+        "env_file": BASE_DIR / ".env",
+        "extra": "ignore",
+    }
 
 
 class Settings(BaseSettings):
@@ -69,5 +86,3 @@ class Settings(BaseSettings):
 
 
 settings = Settings()
-
-print(settings.auth_jwt)
