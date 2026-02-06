@@ -67,8 +67,17 @@ class OrderCrud(BaseCrud[Order, OrderCreate, OrderUpdate]):
         new_status: OrderStatus,
     ) -> Order:
         """Обновить статус заказа."""
-        db_obj.status = new_status
-        return await self._commit_refresh(session, db_obj)
+        order = db_obj
+        if new_status == OrderStatus.cancelled and db_obj.status == OrderStatus.pending:
+            order_with_items = await self.get_with_items(session, db_obj.id)
+            if order_with_items:
+                order = order_with_items
+                for item in order.items:
+                    if item.product:
+                        item.product.stock += item.quantity
+
+        order.status = new_status
+        return await self._commit_refresh(session, order)
 
     async def get_user_orders_by_status(
         self,
