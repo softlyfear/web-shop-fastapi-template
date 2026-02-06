@@ -1,3 +1,5 @@
+"""CRUD operations package."""
+
 from app.crud.base import BaseCrud
 from app.crud.category import category_crud
 from app.crud.order import order_crud

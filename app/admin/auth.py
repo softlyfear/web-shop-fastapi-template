@@ -1,3 +1,5 @@
+"""Admin panel authentication backend."""
+
 from sqladmin.authentication import AuthenticationBackend
 from starlette.requests import Request
 
@@ -7,8 +9,10 @@ from app.crud import user_crud
 
 
 class AdminAuth(AuthenticationBackend):
+    """Admin authentication backend."""
+
     async def login(self, request: Request) -> bool:
-        """Вход для суперпользователей из БД."""
+        """Login for superusers from database."""
         form = await request.form()
         username = form.get("username")
         password = form.get("password")
@@ -43,7 +47,7 @@ class AdminAuth(AuthenticationBackend):
         return True
 
     async def authenticate(self, request: Request) -> bool:
-        """Проверка при каждом запросе к админке."""
+        """Validate on each admin request."""
         token = request.session.get("token")
 
         if not token:

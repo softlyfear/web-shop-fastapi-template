@@ -1,3 +1,5 @@
+"""SQLAlchemy models package."""
+
 from app.models.base import Base, CreateAtMixin, UpdateAtMixin, num_10_2, str_255
 from app.models.category import Category
 from app.models.order import Order, OrderStatus

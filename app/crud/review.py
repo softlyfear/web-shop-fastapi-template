@@ -1,3 +1,5 @@
+"""Review CRUD operations."""
+
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -7,6 +9,8 @@ from app.schemas import ReviewCreate, ReviewUpdate
 
 
 class ReviewCrud(BaseCrud[Review, ReviewCreate, ReviewUpdate]):
+    """CRUD operations for Review model."""
+
     async def get_by_product_id(
         self,
         session: AsyncSession,
@@ -14,7 +18,7 @@ class ReviewCrud(BaseCrud[Review, ReviewCreate, ReviewUpdate]):
         offset: int = 0,
         limit: int = 25,
     ) -> list[Review]:
-        """Получить все отзывы для продукта."""
+        """Get all reviews for product."""
         stmt = (
             select(Review)
             .where(Review.product_id == product_id)
@@ -32,7 +36,7 @@ class ReviewCrud(BaseCrud[Review, ReviewCreate, ReviewUpdate]):
         offset: int = 0,
         limit: int = 25,
     ) -> list[Review]:
-        """Получить все отзывы пользователя."""
+        """Get all user reviews."""
         stmt = (
             select(Review)
             .where(Review.user_id == user_id)
@@ -49,7 +53,7 @@ class ReviewCrud(BaseCrud[Review, ReviewCreate, ReviewUpdate]):
         user_id: int,
         product_id: int,
     ) -> Review | None:
-        """Проверить, оставлял ли пользователь отзыв на продукт."""
+        """Check if user has reviewed product."""
         stmt = select(Review).where(
             Review.user_id == user_id,
             Review.product_id == product_id,
@@ -62,17 +66,17 @@ class ReviewCrud(BaseCrud[Review, ReviewCreate, ReviewUpdate]):
         session: AsyncSession,
         obj_in: ReviewCreate,
     ) -> Review:
-        """Создать отзыв с проверкой на дубликаты."""
+        """Create review with duplicate check."""
         existing = await self.get_user_review_for_product(
             session, obj_in.user_id, obj_in.product_id
         )
         if existing:
             raise ValueError(
-                "Вы уже оставляли отзыв на этот товар. Используйте редактирование."
+                "You have already reviewed this product. Use edit instead."
             )
 
         if not 1 <= obj_in.rating <= 5:
-            raise ValueError("Рейтинг должен быть от 1 до 5")
+            raise ValueError("Rating must be between 1 and 5")
 
         return await self.create(session, obj_in)
 
@@ -81,7 +85,7 @@ class ReviewCrud(BaseCrud[Review, ReviewCreate, ReviewUpdate]):
         session: AsyncSession,
         product_id: int,
     ) -> float | None:
-        """Получить среднюю оценку продукта."""
+        """Get product average rating."""
         stmt = select(func.avg(Review.rating)).where(Review.product_id == product_id)
         result = await session.execute(stmt)
         avg = result.scalar_one()
@@ -92,7 +96,7 @@ class ReviewCrud(BaseCrud[Review, ReviewCreate, ReviewUpdate]):
         session: AsyncSession,
         product_id: int,
     ) -> dict[int, int]:
-        """Получить количество отзывов для каждой оценки (1-5)."""
+        """Get review count for each rating (1-5)."""
         stmt = (
             select(Review.rating, func.count(Review.id))
             .where(Review.product_id == product_id)

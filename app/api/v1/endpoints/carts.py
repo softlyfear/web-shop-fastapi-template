@@ -1,3 +1,5 @@
+"""Cart API endpoints."""
+
 from fastapi import APIRouter, Request, status
 
 from app.core import SessionDep
@@ -17,7 +19,7 @@ async def get_cart(
     request: Request,
     session: SessionDep,
 ):
-    """Получить содержимое корзины."""
+    """Get cart contents."""
     cart_details = await CartManager.get_cart_details(request, session)
     return CartResponse(**cart_details)
 
@@ -33,14 +35,14 @@ async def add_to_cart(
     request: Request,
     session: SessionDep,
 ):
-    """Добавить товар в корзину."""
+    """Add item to cart."""
     await CartManager.add_to_cart(
         request,
         session,
         item.product_id,
         item.quantity,
     )
-    return {"message": "Товар добавлен в корзину"}
+    return {"message": "Item added to cart"}
 
 
 @router.patch(
@@ -54,14 +56,14 @@ async def update_cart_item(
     request: Request,
     session: SessionDep,
 ):
-    """Обновить количество товара в корзине."""
+    """Update cart item quantity."""
     await CartManager.update_cart_item(
         request,
         session,
         item.product_id,
         item.quantity,
     )
-    return {"message": "Корзина обновлена"}
+    return {"message": "Cart updated"}
 
 
 @router.delete(
@@ -74,7 +76,7 @@ async def remove_from_cart(
     request: Request,
     session: SessionDep,
 ):
-    """Удалить товар из корзины."""
+    """Remove item from cart."""
     await CartManager.remove_from_cart(request, product_id)
 
 
@@ -84,5 +86,5 @@ async def remove_from_cart(
     status_code=status.HTTP_204_NO_CONTENT,
 )
 async def clear_cart(request: Request):
-    """Очистить всю корзину."""
+    """Clear entire cart."""
     CartManager.clear_cart(request)

@@ -1,3 +1,5 @@
+"""Base CRUD operations class."""
+
 from loguru import logger
 from pydantic import BaseModel
 from sqlalchemy import select
@@ -11,15 +13,18 @@ class BaseCrud[
     CreateSchemaType: BaseModel,
     UpdateSchemaType: BaseModel,
 ]:
-    """Абстрактный базовый класс для CRUD-операций с БД."""
+    """Base class for CRUD operations."""
 
     def __init__(self, model: type[ModelType]) -> None:
+        """Initialize CRUD with model class."""
         self.model = model
 
     def _prepare_create_data(self, obj_in: CreateSchemaType) -> dict:
+        """Prepare data for creation."""
         return obj_in.model_dump()
 
     def _prepare_update_data(self, obj_in: UpdateSchemaType) -> dict:
+        """Prepare data for update."""
         return obj_in.model_dump(exclude_unset=True)
 
     async def _commit_refresh(
@@ -27,6 +32,7 @@ class BaseCrud[
         session: AsyncSession,
         obj: ModelType,
     ) -> ModelType:
+        """Commit and refresh object."""
         try:
             await session.commit()
             await session.refresh(obj)
@@ -40,6 +46,7 @@ class BaseCrud[
         session: AsyncSession,
         obj_in: CreateSchemaType,
     ) -> ModelType:
+        """Create new object."""
         data = self._prepare_create_data(obj_in)
         obj = self.model(**data)
         session.add(obj)
@@ -50,6 +57,7 @@ class BaseCrud[
         session: AsyncSession,
         obj_id: int,
     ) -> ModelType | None:
+        """Get object by ID."""
         return await session.get(self.model, obj_id)
 
     async def get_multi(
@@ -58,6 +66,7 @@ class BaseCrud[
         offset: int = 0,
         limit: int = 25,
     ) -> list[ModelType]:
+        """Get multiple objects with pagination."""
         stmt = select(self.model).order_by(self.model.id).offset(offset).limit(limit)
         result = await session.execute(stmt)
         return list(result.scalars().all())
@@ -68,13 +77,14 @@ class BaseCrud[
         db_obj: ModelType,
         obj_in: UpdateSchemaType,
     ) -> ModelType:
+        """Update existing object."""
         data = self._prepare_update_data(obj_in)
         for field, value in data.items():
             if hasattr(db_obj, field):
                 setattr(db_obj, field, value)
             else:
                 logger.warning(
-                    f"Поле {field} не существует в модели {self.model.__name__}"
+                    f"Field {field} does not exist in model {self.model.__name__}"
                 )
         return await self._commit_refresh(session, db_obj)
 
@@ -83,6 +93,7 @@ class BaseCrud[
         session: AsyncSession,
         db_obj: ModelType,
     ) -> None:
+        """Delete object."""
         await session.delete(db_obj)
         try:
             await session.commit()

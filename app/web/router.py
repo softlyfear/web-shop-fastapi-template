@@ -1,3 +1,5 @@
+"""Web router configuration."""
+
 from fastapi import APIRouter
 
 from app.web.account import router as account_router

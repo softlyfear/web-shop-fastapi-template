@@ -1,3 +1,5 @@
+"""FastAPI dependency injection utilities."""
+
 from typing import Annotated
 
 from fastapi import Depends, HTTPException
@@ -17,6 +19,7 @@ SessionDep = Annotated[AsyncSession, Depends(get_async_session)]
 async def get_current_token_payload(
     credentials: HTTPAuthorizationCredentials = Depends(http_bearer),  # noqa: B008
 ) -> dict:
+    """Extract and validate JWT token payload."""
     token = credentials.credentials
     try:
         payload = AuthUtils.decode_jwt(
@@ -25,7 +28,7 @@ async def get_current_token_payload(
     except InvalidTokenError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Ошибка недопустимого токена: {exc}",
+            detail=f"Invalid token error: {exc}",
         ) from exc
 
     AuthUtils.validate_token_type(payload, "access")
@@ -36,28 +39,31 @@ async def get_current_user(
     session: SessionDep,
     payload: dict = Depends(get_current_token_payload),  # noqa: B008
 ) -> User:
+    """Get current user from JWT payload."""
     user_id: int = int(payload.get("sub"))
     user = await user_crud.get(session, user_id)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Неправильное имя пользователя или пароль",
+            detail="Incorrect username or password",
         )
     return user
 
 
 async def get_active_user(user: User = Depends(get_current_user)):  # noqa: B008
+    """Get current active user."""
     if user.is_active:
         return user
     raise HTTPException(
         status_code=status.HTTP_403_FORBIDDEN,
-        detail="Пользователь не активен",
+        detail="User is not active",
     )
 
 
 async def get_superuser(user: User = Depends(get_active_user)) -> User:  # noqa: B008
+    """Get current superuser."""
     if not user.is_superuser:
-        raise HTTPException(403, "Недостаточно разрешений")
+        raise HTTPException(403, "Insufficient permissions")
     return user
 
 

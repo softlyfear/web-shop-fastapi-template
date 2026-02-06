@@ -1,3 +1,5 @@
+"""Core application components."""
+
 from app.core.config import settings
 from app.core.database import async_engine, async_session, get_async_session
 from app.core.deps import SessionDep

@@ -1,3 +1,5 @@
+"""Base SQLAlchemy models and mixins."""
+
 from datetime import datetime
 from typing import Annotated
 
@@ -14,6 +16,8 @@ num_10_2 = Annotated[float, 10]
 
 
 class Base(DeclarativeBase):
+    """Base model with id and tablename configuration."""
+
     id: Mapped[int] = mapped_column(
         Integer,
         primary_key=True,
@@ -27,10 +31,13 @@ class Base(DeclarativeBase):
 
     @declared_attr.directive
     def __tablename__(cls) -> str:
+        """Generate tablename from class name."""
         return f"{cls.__name__.lower()}s"
 
 
 class CreateAtMixin:
+    """Mixin for created_at timestamp field."""
+
     created_at: Mapped[datetime] = mapped_column(
         server_default=text("TIMEZONE('utc', now())"),
         nullable=False,
@@ -38,6 +45,8 @@ class CreateAtMixin:
 
 
 class UpdateAtMixin:
+    """Mixin for updated_at timestamp field."""
+
     updated_at: Mapped[datetime] = mapped_column(
         server_default=text("TIMEZONE('utc', now())"),
         onupdate=text("TIMEZONE('utc', now())"),

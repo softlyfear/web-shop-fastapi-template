@@ -1,3 +1,5 @@
+"""Category model."""
+
 from typing import TYPE_CHECKING
 
 from sqlalchemy.orm import Mapped, mapped_column, relationship
@@ -9,6 +11,8 @@ from app.models import Base, CreateAtMixin, UpdateAtMixin, str_255
 
 
 class Category(Base, CreateAtMixin, UpdateAtMixin):
+    """Product category model."""
+
     __tablename__ = "categories"  # type: ignore
 
     name: Mapped[str_255] = mapped_column(unique=True)

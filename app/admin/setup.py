@@ -1,3 +1,5 @@
+"""Admin panel setup and configuration."""
+
 import io
 
 from fastapi import FastAPI
@@ -44,6 +46,7 @@ class AdminWithUploads(Admin):
 
 
 def setup_admin(app: FastAPI):
+    """Initialize admin panel with views."""
     admin = AdminWithUploads(
         app,
         async_engine,

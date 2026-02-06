@@ -1,3 +1,5 @@
+"""User API endpoints."""
+
 from fastapi import HTTPException, status
 
 from app.api.v1.router_factory import build_crud_router
@@ -28,11 +30,11 @@ async def get_user_by_username(
     session: SessionDep,
     current_user: CurrentUser,
 ):
-    """Получить пользователя по username (только для авторизованных)."""
+    """Get user by username (authenticated only)."""
     user = await user_crud.get_user_by_username(session, username)
     if not user:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Пользователь не найден"
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found"
         )
     return user
 
@@ -49,7 +51,7 @@ async def get_active_users(
     offset: int = 0,
     limit: int = 25,
 ):
-    """Получить активных пользователей (только для администраторов)."""
+    """Get active users (admins only)."""
     return await user_crud.get_active_users(session, offset, limit)
 
 
@@ -64,7 +66,7 @@ async def toggle_user_active_status(
     session: SessionDep,
     admin: SuperUser,
 ):
-    """Переключить статус активности пользователя (только для администраторов)."""
+    """Toggle user active status (admins only)."""
     user = await get_or_404(user_crud, session, user_id)
     return await user_crud.toggle_active_status(session, user)
 
@@ -80,18 +82,18 @@ async def change_my_password(
     session: SessionDep,
     user: ActiveUser,
 ):
-    """Изменить пароль текущего пользователя."""
+    """Change current user password."""
     from app.core.security import AuthUtils
 
     if not AuthUtils.verify_password(
         password_data.current_password, user.hashed_password
     ):
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Неверный текущий пароль"
+            status_code=status.HTTP_400_BAD_REQUEST, detail="Incorrect current password"
         )
 
     await user_crud.update_password(session, user, password_data.new_password)
-    return {"message": "Пароль успешно изменен"}
+    return {"message": "Password successfully changed"}
 
 
 @router.get(
@@ -105,11 +107,11 @@ async def get_user_statistics(
     session: SessionDep,
     current_user: CurrentUser,
 ):
-    """Получить статистику пользователя."""
+    """Get user statistics."""
     if current_user.id != user_id and not current_user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Нет доступа к статистике другого пользователя",
+            detail="No access to another user's statistics",
         )
 
     return await user_crud.get_user_statistics(session, user_id)
@@ -125,5 +127,5 @@ async def get_my_statistics(
     session: SessionDep,
     user: ActiveUser,
 ):
-    """Получить статистику текущего пользователя."""
+    """Get current user statistics."""
     return await user_crud.get_user_statistics(session, user.id)

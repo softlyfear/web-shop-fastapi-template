@@ -1,3 +1,5 @@
+"""User authentication and registration logic."""
+
 from fastapi import Form, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette import status
@@ -13,11 +15,12 @@ async def authenticate_user(
     username: str,
     password: str,
 ) -> User:
+    """Authenticate user by username and password."""
     user = await user_crud.get_user_by_username(session, username)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Неправильное имя пользователя или пароль",
+            detail="Incorrect username or password",
         )
 
     if not AuthUtils.verify_password(
@@ -26,37 +29,34 @@ async def authenticate_user(
     ):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Неправильное имя пользователя или пароль",
+            detail="Incorrect username or password",
         )
 
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Пользователь не активен",
+            detail="User is not active",
         )
-    return
+    return user
 
 
 async def register_user(
     session: AsyncSession,
     user_data: UserCreate,
 ) -> User:
-    """
-    Регистрация нового пользователя.
-    Проверяет уникальность username и email.
-    """
+    """Register new user with unique username and email."""
     existing_user = await user_crud.get_user_by_username(session, user_data.username)
     if existing_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Пользователь с таким именем уже существует",
+            detail="User with this username already exists",
         )
 
     existing_email = await user_crud.get_user_by_email(session, user_data.email)
     if existing_email:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email уже зарегистрирован",
+            detail="Email already registered",
         )
 
     user = await user_crud.create(session, user_data)
@@ -68,11 +68,12 @@ async def validate_auth_user_form(
     username: str = Form(),
     password: str = Form(),
 ) -> User:
+    """Validate user credentials from form data."""
     return await authenticate_user(session, username, password)
 
 
 def create_token_pair(user: User) -> TokenPair:
-    """Создает access и refresh токены для пользователя."""
+    """Create access and refresh tokens for user."""
     access_token = AuthUtils.create_access_token(
         user_id=user.id, username=user.username
     )

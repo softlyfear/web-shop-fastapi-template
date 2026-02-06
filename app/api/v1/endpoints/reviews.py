@@ -1,3 +1,5 @@
+"""Review API endpoints."""
+
 from fastapi import HTTPException, status
 
 from app.api.v1.router_factory import build_crud_router
@@ -27,7 +29,7 @@ async def get_product_reviews(
     offset: int = 0,
     limit: int = 25,
 ):
-    """Получить все отзывы для продукта."""
+    """Get all reviews for product."""
     return await review_crud.get_by_product_id(session, product_id, offset, limit)
 
 
@@ -44,11 +46,11 @@ async def get_user_reviews(
     offset: int = 0,
     limit: int = 25,
 ):
-    """Получить все отзывы пользователя."""
+    """Get all user reviews."""
     if current_user.id != user_id and not current_user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Нет доступа к отзывам другого пользователя",
+            detail="No access to another user's reviews",
         )
     return await review_crud.get_by_user_id(session, user_id, offset, limit)
 
@@ -65,7 +67,7 @@ async def get_my_reviews(
     offset: int = 0,
     limit: int = 25,
 ):
-    """Получить отзывы текущего пользователя."""
+    """Get current user reviews."""
     return await review_crud.get_by_user_id(session, user.id, offset, limit)
 
 
@@ -81,11 +83,11 @@ async def get_user_product_review(
     session: SessionDep,
     current_user: CurrentUser,
 ):
-    """Проверить, оставлял ли пользователь отзыв на продукт."""
+    """Check if user has reviewed product."""
     if current_user.id != user_id and not current_user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Нет доступа к отзывам другого пользователя",
+            detail="No access to another user's reviews",
         )
     return await review_crud.get_user_review_for_product(session, user_id, product_id)
 
@@ -101,11 +103,11 @@ async def create_review_validated(
     session: SessionDep,
     user: ActiveUser,
 ):
-    """Создать отзыв с проверкой на дубликаты."""
+    """Create review with duplicate check."""
     if review_in.user_id != user.id and not user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Можно создавать отзывы только от своего имени",
+            detail="Can only create reviews on your own behalf",
         )
 
     try:
@@ -126,7 +128,7 @@ async def get_product_rating(
     product_id: int,
     session: SessionDep,
 ):
-    """Получить среднюю оценку продукта."""
+    """Get product average rating."""
     avg_rating = await review_crud.get_average_rating(session, product_id)
     return {
         "product_id": product_id,
@@ -144,7 +146,7 @@ async def get_product_rating_stats(
     product_id: int,
     session: SessionDep,
 ):
-    """Получить детальную статистику оценок продукта."""
+    """Get detailed product rating statistics."""
     avg_rating = await review_crud.get_average_rating(session, product_id)
     rating_counts = await review_crud.get_rating_counts(session, product_id)
 

@@ -1,3 +1,5 @@
+"""Category CRUD operations."""
+
 from slugify import slugify
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,6 +11,8 @@ from app.schemas import CategoryCreate, CategoryUpdate
 
 
 class CategoryCrud(BaseCrud[Category, CategoryCreate, CategoryUpdate]):
+    """CRUD operations for Category model."""
+
     def _prepare_create_data(self, obj_in: CategoryCreate) -> dict:
         data = obj_in.model_dump()
         if not data.get("slug"):
@@ -26,7 +30,7 @@ class CategoryCrud(BaseCrud[Category, CategoryCreate, CategoryUpdate]):
         session: AsyncSession,
         slug: str,
     ) -> Category | None:
-        """Получить категорию по slug."""
+        """Get category by slug."""
         stmt = select(Category).where(Category.slug == slug)
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
@@ -36,7 +40,7 @@ class CategoryCrud(BaseCrud[Category, CategoryCreate, CategoryUpdate]):
         session: AsyncSession,
         category_id: int,
     ) -> Category | None:
-        """Получить категорию со всеми продуктами (eager loading)."""
+        """Get category with all products (eager loading)."""
         stmt = (
             select(Category)
             .where(Category.id == category_id)
@@ -49,7 +53,7 @@ class CategoryCrud(BaseCrud[Category, CategoryCreate, CategoryUpdate]):
         self,
         session: AsyncSession,
     ) -> list[dict]:
-        """Получить категории с количеством активных продуктов."""
+        """Get categories with active product count."""
         stmt = (
             select(
                 Category.id,

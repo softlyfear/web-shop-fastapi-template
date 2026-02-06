@@ -1,3 +1,5 @@
+"""Product model."""
+
 from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey, String, Text, text
@@ -10,6 +12,8 @@ from app.models import Base, CreateAtMixin, UpdateAtMixin, num_10_2, str_255
 
 
 class Product(Base, CreateAtMixin, UpdateAtMixin):
+    """Product catalog item model."""
+
     name: Mapped[str_255]
     slug: Mapped[str_255 | None] = mapped_column(unique=True)
     description: Mapped[str | None] = mapped_column(Text)

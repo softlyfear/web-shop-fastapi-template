@@ -1,3 +1,5 @@
+"""Product Pydantic schemas."""
+
 from datetime import datetime
 from decimal import Decimal
 
@@ -5,6 +7,8 @@ from app.schemas import BaseSchema
 
 
 class ProductBase(BaseSchema):
+    """Base product schema."""
+
     name: str
     slug: str | None = None
     description: str | None = None
@@ -16,10 +20,14 @@ class ProductBase(BaseSchema):
 
 
 class ProductCreate(ProductBase):
+    """Schema for product creation."""
+
     pass
 
 
 class ProductUpdate(BaseSchema):
+    """Schema for product update."""
+
     name: str | None = None
     slug: str | None = None
     description: str | None = None
@@ -31,6 +39,8 @@ class ProductUpdate(BaseSchema):
 
 
 class ProductRead(ProductBase):
+    """Schema for product response."""
+
     id: int
     created_at: datetime
     updated_at: datetime

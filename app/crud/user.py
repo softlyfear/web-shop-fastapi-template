@@ -1,3 +1,5 @@
+"""User CRUD operations."""
+
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -8,6 +10,8 @@ from app.schemas import UserCreate, UserUpdate
 
 
 class UserCrud(BaseCrud[User, UserCreate, UserUpdate]):
+    """CRUD operations for User model."""
+
     def _prepare_create_data(self, obj_in: UserCreate) -> dict:
         data = obj_in.model_dump(exclude={"password"})
         data["hashed_password"] = AuthUtils.hash_password(obj_in.password)
@@ -18,7 +22,7 @@ class UserCrud(BaseCrud[User, UserCreate, UserUpdate]):
         session: AsyncSession,
         username: str,
     ) -> User | None:
-        """Находит пользователя по username."""
+        """Find user by username."""
         stmt = select(User).where(User.username == username)
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
@@ -28,7 +32,7 @@ class UserCrud(BaseCrud[User, UserCreate, UserUpdate]):
         session: AsyncSession,
         email: str,
     ) -> User | None:
-        """Находит пользователя по email."""
+        """Find user by email."""
         stmt = select(User).where(User.email == email)
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
@@ -39,7 +43,7 @@ class UserCrud(BaseCrud[User, UserCreate, UserUpdate]):
         user: User,
         new_password: str,
     ) -> User:
-        """Обновить пароль пользователя."""
+        """Update user password."""
         user.hashed_password = AuthUtils.hash_password(new_password)
         return await self._commit_refresh(session, user)
 
@@ -48,7 +52,7 @@ class UserCrud(BaseCrud[User, UserCreate, UserUpdate]):
         session: AsyncSession,
         user: User,
     ) -> User:
-        """Переключить статус активности пользователя."""
+        """Toggle user active status."""
         user.is_active = not user.is_active
         return await self._commit_refresh(session, user)
 
@@ -58,7 +62,7 @@ class UserCrud(BaseCrud[User, UserCreate, UserUpdate]):
         offset: int = 0,
         limit: int = 25,
     ) -> list[User]:
-        """Получить только активных пользователей."""
+        """Get only active users."""
         stmt = (
             select(User)
             .where(User.is_active)
@@ -74,37 +78,36 @@ class UserCrud(BaseCrud[User, UserCreate, UserUpdate]):
         session: AsyncSession,
         user_id: int,
     ) -> dict:
-        """Получить статистику пользователя (количество заказов,
-        отзывов и потраченных денег)."""
+        """Get user statistics including orders, reviews, and spending."""
         from app.models import OrderStatus
 
-        # Общее количество заказов
+        # Total orders count
         orders_stmt = select(func.count(Order.id)).where(Order.user_id == user_id)
         orders_result = await session.execute(orders_stmt)
         total_orders = orders_result.scalar_one()
 
-        # Количество заказов в ожидании (pending)
+        # Pending orders count
         pending_stmt = select(func.count(Order.id)).where(
             Order.user_id == user_id, Order.status == OrderStatus.pending
         )
         pending_result = await session.execute(pending_stmt)
         pending_orders = pending_result.scalar_one()
 
-        # Количество завершенных заказов (delivered)
+        # Completed orders count
         completed_stmt = select(func.count(Order.id)).where(
             Order.user_id == user_id, Order.status == OrderStatus.delivered
         )
         completed_result = await session.execute(completed_stmt)
         completed_orders = completed_result.scalar_one()
 
-        # Общая сумма потраченных денег (только оплаченные: paid)
+        # Total spent (paid orders only)
         total_spent_stmt = select(func.sum(Order.total_price)).where(
             Order.user_id == user_id, Order.status == OrderStatus.paid
         )
         total_spent_result = await session.execute(total_spent_stmt)
         total_spent = total_spent_result.scalar_one() or 0
 
-        # Количество отзывов
+        # Reviews count
         reviews_stmt = select(func.count(Review.id)).where(Review.user_id == user_id)
         reviews_result = await session.execute(reviews_stmt)
         reviews_count = reviews_result.scalar_one()

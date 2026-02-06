@@ -1,3 +1,5 @@
+"""User model."""
+
 from sqlalchemy import text
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -5,6 +7,8 @@ from app.models import Base, CreateAtMixin, UpdateAtMixin
 
 
 class User(Base, CreateAtMixin, UpdateAtMixin):
+    """User account model."""
+
     email: Mapped[str] = mapped_column(unique=True)
     username: Mapped[str] = mapped_column(unique=True)
     hashed_password: Mapped[str]

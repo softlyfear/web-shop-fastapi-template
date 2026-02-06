@@ -1,3 +1,5 @@
+"""Order API endpoints."""
+
 from fastapi import HTTPException, Query, status
 
 from app.api.v1.router_factory import build_crud_router
@@ -8,7 +10,7 @@ from app.crud import order_crud
 from app.models import OrderStatus
 from app.schemas import OrderCreate, OrderItemCreate, OrderRead, OrderUpdate
 
-# Базовые CRUD роуты
+# Base CRUD routes
 router = build_crud_router(
     crud=order_crud,
     create_schema=OrderCreate,
@@ -18,7 +20,7 @@ router = build_crud_router(
 )
 
 
-# Переопределяем GET / для получения заказов текущего пользователя
+# Override GET / for current user orders
 @router.get(
     "/",
     name="Get my orders",
@@ -28,14 +30,11 @@ router = build_crud_router(
 async def get_my_orders(
     session: SessionDep,
     user: CurrentUser,
-    status_filter: str | None = Query(None, description="Фильтр по статусу заказа"),
+    status_filter: str | None = Query(None, description="Filter by order status"),
     offset: int = Query(0, ge=0),
     limit: int = Query(25, ge=1, le=100),
 ):
-    """
-    Получить заказы текущего пользователя (из JWT токена).
-    Требование ТЗ: GET /api/v1/orders/ - список своих заказов.
-    """
+    """Get current user orders (from JWT token)."""
     if status_filter:
         try:
             order_status = OrderStatus[status_filter]
@@ -45,7 +44,7 @@ async def get_my_orders(
         except KeyError:
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Неверный статус. Доступные: {[s.value for s in OrderStatus]}",
+                detail=f"Invalid status. Available: {[s.value for s in OrderStatus]}",
             ) from None
 
     return await order_crud.get_by_user_id(session, user.id, offset, limit)
@@ -64,12 +63,12 @@ async def get_user_orders(
     offset: int = Query(0, ge=0),
     limit: int = Query(25, ge=1, le=100),
 ):
-    """Получить все заказы пользователя (только свои или админ)."""
-    # Проверка: пользователь может видеть только свои заказы
+    """Get all user orders (own or admin)."""
+    # Check: user can only see their own orders
     if current_user.id != user_id and not current_user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Нет доступа к заказам другого пользователя",
+            detail="No access to another user's orders",
         ) from None
     return await order_crud.get_by_user_id(session, user_id, offset, limit)
 
@@ -87,13 +86,13 @@ async def get_orders_by_status(
     offset: int = Query(0, ge=0),
     limit: int = Query(25, ge=1, le=100),
 ):
-    """Получить заказы по статусу (только для администраторов)."""
+    """Get orders by status (admins only)."""
     try:
         order_status = OrderStatus[status_value]
     except KeyError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Неверный статус. Доступные: {[s.value for s in OrderStatus]}",
+            detail=f"Invalid status. Available: {[s.value for s in OrderStatus]}",
         ) from None
 
     return await order_crud.get_by_status(session, order_status, offset, limit)
@@ -110,17 +109,17 @@ async def get_order_with_items(
     session: SessionDep,
     current_user: CurrentUser,
 ):
-    """Получить заказ со всеми позициями (eager loading)."""
+    """Get order with all items (eager loading)."""
     order = await order_crud.get_with_items(session, order_id)
     if not order:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Заказ не найден"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Order not found"
         )
 
-    # Проверка доступа
+    # Access check
     if order.user_id != current_user.id and not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Нет доступа к этому заказу"
+            status_code=status.HTTP_403_FORBIDDEN, detail="No access to this order"
         )
 
     return order
@@ -134,40 +133,40 @@ async def get_order_with_items(
 )
 async def update_order_status(
     order_id: int,
-    new_status: str = Query(..., description="Новый статус заказа"),
+    new_status: str = Query(..., description="New order status"),
     session: SessionDep = ...,
     current_user: CurrentUser = ...,
 ):
-    """
-    Обновить статус заказа.
-    - Пользователь может отменить только свой заказ (статус 'cancelled')
-    - Админ может изменять любые статусы
+    """Update order status.
+
+    - User can cancel own order only (status 'cancelled')
+    - Admin can change any status
     """
     order = await get_or_404(order_crud, session, order_id)
 
-    # Парсим статус
+    # Parse status
     try:
         status_enum = OrderStatus[new_status]
     except KeyError:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Неверный статус. Доступные: {[s.value for s in OrderStatus]}",
+            detail=f"Invalid status. Available: {[s.value for s in OrderStatus]}",
         ) from None
 
-    # Проверка прав
+    # Permission check
     if status_enum == OrderStatus.cancelled:
-        # Пользователь может отменить свой заказ
+        # User can cancel own order
         if order.user_id != current_user.id and not current_user.is_superuser:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Нет доступа к этому заказу",
+                detail="No access to this order",
             )
     else:
-        # Изменение других статусов только для админов
+        # Other status changes only for admins
         if not current_user.is_superuser:
             raise HTTPException(
                 status_code=status.HTTP_403_FORBIDDEN,
-                detail="Только администраторы могут изменять статус",
+                detail="Only admins can change status",
             )
 
     return await order_crud.update_status(session, order, status_enum)
@@ -185,21 +184,18 @@ async def create_order_with_items(
     session: SessionDep,
     user: CurrentUser,
 ):
-    """
-    Создать заказ со всеми позициями атомарно.
-    Альтернативный способ создания заказа (кроме checkout).
-    """
-    # Убедимся, что заказ создается для текущего пользователя
+    """Create order with all items atomically (alternative to checkout)."""
+    # Ensure order is created for current user
     if order_in.user_id != user.id and not user.is_superuser:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Можно создавать заказы только для себя",
+            detail="Can only create orders for yourself",
         )
 
     if not items_in:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Заказ должен содержать хотя бы одну позицию",
+            detail="Order must contain at least one item",
         )
 
     # Преобразуем items в формат для create_order_with_items

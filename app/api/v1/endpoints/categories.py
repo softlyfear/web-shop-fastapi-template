@@ -1,3 +1,5 @@
+"""Category API endpoints."""
+
 from fastapi import HTTPException, status
 
 from app.api.v1.router_factory import build_crud_router
@@ -5,7 +7,7 @@ from app.core import SessionDep
 from app.crud import category_crud
 from app.schemas import CategoryCreate, CategoryRead, CategoryUpdate
 
-# Базовые CRUD роуты
+# Base CRUD routes
 router = build_crud_router(
     crud=category_crud,
     create_schema=CategoryCreate,
@@ -25,11 +27,11 @@ async def get_category_by_slug(
     slug: str,
     session: SessionDep,
 ):
-    """Получить категорию по slug."""
+    """Get category by slug."""
     category = await category_crud.get_by_slug(session, slug)
     if not category:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Категория не найдена"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Category not found"
         )
     return category
 
@@ -44,11 +46,11 @@ async def get_category_with_products(
     category_id: int,
     session: SessionDep,
 ):
-    """Получить категорию со всеми продуктами (eager loading)."""
+    """Get category with all products (eager loading)."""
     category = await category_crud.get_with_products(session, category_id)
     if not category:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND, detail="Категория не найдена"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Category not found"
         )
     return category
 
@@ -62,5 +64,5 @@ async def get_category_with_products(
 async def get_categories_with_product_counts(
     session: SessionDep,
 ):
-    """Получить категории с количеством активных продуктов."""
+    """Get categories with active product counts."""
     return await category_crud.get_categories_with_product_count(session)

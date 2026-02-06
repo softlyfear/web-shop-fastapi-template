@@ -1,3 +1,5 @@
+"""CRUD router factory."""
+
 from typing import TYPE_CHECKING
 
 from fastapi import APIRouter, status
@@ -10,7 +12,7 @@ if TYPE_CHECKING:
 
 
 def get_plural_name(name: str) -> str:
-    """Возвращает форму множественного числа для английских существительных."""
+    """Get plural form of English nouns."""
     exceptions = {
         "category": "categories",
     }
@@ -25,6 +27,7 @@ def build_crud_router(
     read_schema: type[BaseModel],
     resource_name: str,
 ) -> APIRouter:
+    """Build standard CRUD router for resource."""
     router = APIRouter()
 
     resource_plural = get_plural_name(resource_name)

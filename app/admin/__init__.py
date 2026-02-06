@@ -1,3 +1,5 @@
+"""Admin panel package."""
+
 from app.admin.auth import AdminAuth
 from app.admin.views import (
     CategoryAdmin,

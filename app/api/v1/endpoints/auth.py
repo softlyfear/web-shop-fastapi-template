@@ -1,3 +1,5 @@
+"""Authentication API endpoints."""
+
 from fastapi import APIRouter, HTTPException, status
 from jwt import InvalidTokenError
 
@@ -22,7 +24,7 @@ async def login(
     session: SessionDep,
     credentials: LoginRequest,
 ):
-    """Вход пользователя - возвращает пару токенов."""
+    """User login - returns token pair."""
     user = await authenticate_user(session, credentials.username, credentials.password)
     tokens = create_token_pair(user)
     return tokens
@@ -33,7 +35,7 @@ async def register(
     session: SessionDep,
     user_data: UserCreate,
 ):
-    """Регистрация нового пользователя."""
+    """Register new user."""
     user = await register_user(session, user_data)
     tokens = create_token_pair(user)
     return tokens
@@ -44,14 +46,14 @@ async def refresh(
     session: SessionDep,
     data: RefreshRequest,
 ):
-    """Обновление access токена."""
-    # 1. Декодировать refresh токен
+    """Refresh access token."""
+    # Decode refresh token
     try:
         payload = AuthUtils.decode_jwt(data.refresh_token)
     except InvalidTokenError as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Недопустимый токен обновления: {exc}",
+            detail=f"Invalid refresh token: {exc}",
         ) from exc
 
     AuthUtils.validate_token_type(payload, "refresh")
@@ -61,13 +63,13 @@ async def refresh(
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Пользователь не найден",
+            detail="User not found",
         )
 
     if not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Пользователь не активен",
+            detail="User is not active",
         )
 
     access_token = AuthUtils.create_access_token(
@@ -82,7 +84,7 @@ async def refresh(
 async def get_me(
     user: ActiveUser,
 ):
-    """Информация о текущем пользователе."""
+    """Get current user info."""
     return UserInfo(
         username=user.username,
         email=user.email,

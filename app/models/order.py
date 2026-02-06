@@ -1,3 +1,5 @@
+"""Order model and status enum."""
+
 import enum
 from typing import TYPE_CHECKING
 
@@ -12,6 +14,8 @@ from app.models import Base, CreateAtMixin, UpdateAtMixin, num_10_2
 
 
 class OrderStatus(enum.Enum):
+    """Order status enumeration."""
+
     pending = "pending"
     paid = "paid"
     shipped = "shipped"
@@ -20,6 +24,8 @@ class OrderStatus(enum.Enum):
 
 
 class Order(Base, CreateAtMixin, UpdateAtMixin):
+    """Customer order model."""
+
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id", ondelete="CASCADE"))
     status: Mapped[OrderStatus] = mapped_column(
         Enum(OrderStatus),

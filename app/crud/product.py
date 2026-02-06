@@ -1,3 +1,5 @@
+"""Product CRUD operations."""
+
 from slugify import slugify
 from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -9,6 +11,8 @@ from app.schemas import ProductCreate, ProductUpdate
 
 
 class ProductCrud(BaseCrud[Product, ProductCreate, ProductUpdate]):
+    """CRUD operations for Product model."""
+
     def _prepare_create_data(self, obj_in: ProductCreate) -> dict:
         data = obj_in.model_dump()
         if not data.get("slug"):
@@ -26,7 +30,7 @@ class ProductCrud(BaseCrud[Product, ProductCreate, ProductUpdate]):
         session: AsyncSession,
         slug: str,
     ) -> Product | None:
-        """Получить продукт по slug."""
+        """Get product by slug."""
         stmt = (
             select(Product)
             .where(Product.slug == slug)
@@ -43,7 +47,7 @@ class ProductCrud(BaseCrud[Product, ProductCreate, ProductUpdate]):
         limit: int = 25,
         only_active: bool = True,
     ) -> list[Product]:
-        """Получить продукты по категории."""
+        """Get products by category."""
         stmt = select(Product).where(Product.category_id == category_id)
 
         if only_active:
@@ -65,22 +69,21 @@ class ProductCrud(BaseCrud[Product, ProductCreate, ProductUpdate]):
         offset: int = 0,
         limit: int = 25,
     ) -> list[Product]:
-        """
-        Поиск и фильтрация продуктов.
+        """Search and filter products.
 
         Args:
-            search_query: Поисковый запрос по имени или описанию
-            category_id: Фильтр по категории
-            min_price: Минимальная цена
-            max_price: Максимальная цена
-            only_active: Только активные товары
-            sort_by: Сортировка
-            offset: Смещение для пагинации
-            limit: Лимит результатов
+            search_query: Search query for name or description.
+            category_id: Filter by category.
+            min_price: Minimum price.
+            max_price: Maximum price.
+            only_active: Only active products.
+            sort_by: Sort order.
+            offset: Pagination offset.
+            limit: Results limit.
         """
         stmt = select(Product)
 
-        # Фильтры
+        # Filters
         filters = []
 
         if only_active:
@@ -107,7 +110,7 @@ class ProductCrud(BaseCrud[Product, ProductCreate, ProductUpdate]):
         if filters:
             stmt = stmt.where(and_(*filters))
 
-        # Сортировка
+        # Sorting
         sort_mapping = {
             "price_asc": Product.price.asc(),
             "price_desc": Product.price.desc(),
@@ -120,7 +123,7 @@ class ProductCrud(BaseCrud[Product, ProductCreate, ProductUpdate]):
         order_by = sort_mapping.get(sort_by, Product.created_at.desc())
         stmt = stmt.order_by(order_by)
 
-        # Пагинация
+        # Pagination
         stmt = stmt.offset(offset).limit(limit)
 
         result = await session.execute(stmt)
@@ -132,7 +135,7 @@ class ProductCrud(BaseCrud[Product, ProductCreate, ProductUpdate]):
         offset: int = 0,
         limit: int = 25,
     ) -> list[Product]:
-        """Получить только активные продукты."""
+        """Get only active products."""
         stmt = (
             select(Product)
             .where(Product.is_active)
@@ -150,7 +153,7 @@ class ProductCrud(BaseCrud[Product, ProductCreate, ProductUpdate]):
         offset: int = 0,
         limit: int = 25,
     ) -> list[Product]:
-        """Получить продукты с низким остатком."""
+        """Get products with low stock."""
         stmt = (
             select(Product)
             .where(Product.stock <= threshold, Product.is_active)
@@ -167,13 +170,11 @@ class ProductCrud(BaseCrud[Product, ProductCreate, ProductUpdate]):
         product_id: int,
         quantity_change: int,
     ) -> Product:
-        """
-        Обновить остаток товара.
+        """Update product stock.
 
         Args:
-            product_id: ID товара
-            quantity_change: Изменение количества
-            (положительное - добавить, отрицательное - уменьшить)
+            product_id: Product ID.
+            quantity_change: Quantity change (positive to add, negative to reduce).
         """
         product = await self.get(session, product_id)
         if not product:

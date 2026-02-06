@@ -1,3 +1,5 @@
+"""OrderItem model."""
+
 from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey
@@ -11,6 +13,8 @@ from app.models.base import Base, num_10_2
 
 
 class OrderItem(Base):
+    """Order line item model."""
+
     __tablename__ = "order_items"  # type: ignore
 
     order_id: Mapped[int] = mapped_column(ForeignKey("orders.id", ondelete="CASCADE"))

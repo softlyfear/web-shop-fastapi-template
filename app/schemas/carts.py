@@ -1,28 +1,30 @@
+"""Cart Pydantic schemas."""
+
 from decimal import Decimal
 
 from pydantic import BaseModel, Field
 
 
 class CartItemBase(BaseModel):
+    """Base cart item schema."""
+
     product_id: int
-    quantity: int = Field(ge=1, description="Количество должно быть >= 1")
+    quantity: int = Field(ge=1, description="Quantity must be >= 1")
 
 
 class CartItemAdd(CartItemBase):
-    """Схема для добавления товара в корзину."""
-
-    pass
+    """Schema for adding item to cart."""
 
 
 class CartItemUpdate(BaseModel):
-    """Схема для обновления количества товара в корзине."""
+    """Schema for updating cart item quantity."""
 
     product_id: int
-    quantity: int = Field(ge=0, description="Количество (0 = удалить)")
+    quantity: int = Field(ge=0, description="Quantity (0 = remove)")
 
 
 class CartItemResponse(CartItemBase):
-    """Схема для отображения товара в корзине."""
+    """Schema for cart item response."""
 
     name: str
     price: Decimal
@@ -32,7 +34,7 @@ class CartItemResponse(CartItemBase):
 
 
 class CartResponse(BaseModel):
-    """Схема для отображения всей корзины."""
+    """Schema for full cart response."""
 
     items: list[CartItemResponse]
     total_price: Decimal

@@ -1,3 +1,5 @@
+"""Order item API endpoints."""
+
 from fastapi import HTTPException, status
 
 from app.api.v1.router_factory import build_crud_router
@@ -28,12 +30,12 @@ async def get_order_items(
     session: SessionDep,
     current_user: CurrentUser,
 ):
-    """Получить все позиции заказа."""
+    """Get all order items."""
     order = await get_or_404(order_crud, session, order_id)
 
     if order.user_id != current_user.id and not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Нет доступа к этому заказу"
+            status_code=status.HTTP_403_FORBIDDEN, detail="No access to this order"
         )
 
     return await order_item_crud.get_by_order_id(session, order_id)
@@ -51,12 +53,12 @@ async def add_item_to_order(
     session: SessionDep,
     current_user: CurrentUser,
 ):
-    """Добавить позицию в заказ с проверкой наличия товара."""
+    """Add item to order with stock validation."""
     order = await get_or_404(order_crud, session, order_id)
 
     if order.user_id != current_user.id and not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Нет доступа к этому заказу"
+            status_code=status.HTTP_403_FORBIDDEN, detail="No access to this order"
         )
 
     try:
@@ -78,12 +80,12 @@ async def calculate_order_total(
     session: SessionDep,
     current_user: CurrentUser,
 ):
-    """Вычислить общую стоимость заказа."""
+    """Calculate order total price."""
     order = await get_or_404(order_crud, session, order_id)
 
     if order.user_id != current_user.id and not current_user.is_superuser:
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN, detail="Нет доступа к этому заказу"
+            status_code=status.HTTP_403_FORBIDDEN, detail="No access to this order"
         )
 
     total = await order_item_crud.calculate_order_total(session, order_id)

@@ -1,3 +1,5 @@
+"""Review model."""
+
 from typing import TYPE_CHECKING
 
 from sqlalchemy import CheckConstraint, ForeignKey, Text
@@ -10,6 +12,8 @@ if TYPE_CHECKING:
 
 
 class Review(Base, CreateAtMixin):
+    """Product review model."""
+
     product_id: Mapped[int] = mapped_column(
         ForeignKey("products.id", ondelete="CASCADE")
     )

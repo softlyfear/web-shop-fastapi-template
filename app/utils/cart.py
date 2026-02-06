@@ -1,3 +1,5 @@
+"""Shopping cart management utilities."""
+
 from decimal import Decimal
 
 from fastapi import HTTPException, Request
@@ -8,11 +10,11 @@ from app.schemas import CartItemResponse
 
 
 class CartManager:
-    """Менеджер для работы с корзиной в сессии."""
+    """Session-based shopping cart manager."""
 
     @staticmethod
     def get_cart(request: Request) -> dict:
-        """Получить корзину из сессии."""
+        """Get cart from session."""
         return request.session.get("cart", {})
 
     @staticmethod
@@ -22,7 +24,7 @@ class CartManager:
 
     @staticmethod
     def clear_cart(request: Request) -> None:
-        """Очистить корзину."""
+        """Clear cart."""
         request.session["cart"] = {}
 
     @staticmethod
@@ -32,13 +34,13 @@ class CartManager:
         product_id: int,
         quantity: int = 1,
     ) -> dict:
-        """Добавить товар в корзину."""
+        """Add product to cart."""
         product = await product_crud.get(session, product_id)
         if not product:
-            raise HTTPException(status_code=404, detail="Товар не найден")
+            raise HTTPException(status_code=404, detail="Product not found")
 
         if not product.is_active:
-            raise HTTPException(status_code=400, detail="Товар недоступен")
+            raise HTTPException(status_code=400, detail="Product unavailable")
 
         cart = CartManager.get_cart(request)
 
@@ -48,7 +50,7 @@ class CartManager:
         if new_quantity > product.stock:
             raise HTTPException(
                 status_code=400,
-                detail=f"Недостаточно товара на складе. Доступно: {product.stock}",
+                detail=f"Insufficient stock. Available: {product.stock}",
             )
 
         cart[str(product_id)] = {
@@ -66,23 +68,23 @@ class CartManager:
         product_id: int,
         quantity: int,
     ) -> dict:
-        """Обновить количество товара в корзине."""
+        """Update cart item quantity."""
         cart = CartManager.get_cart(request)
 
         if str(product_id) not in cart:
-            raise HTTPException(status_code=404, detail="Товар не найден в корзине")
+            raise HTTPException(status_code=404, detail="Product not found in cart")
 
         if quantity == 0:
             del cart[str(product_id)]
         else:
             product = await product_crud.get(session, product_id)
             if not product:
-                raise HTTPException(status_code=404, detail="Товар не найден")
+                raise HTTPException(status_code=404, detail="Product not found")
 
             if quantity > product.stock:
                 raise HTTPException(
                     status_code=400,
-                    detail=f"Недостаточно товара на складе. Доступно: {product.stock}",
+                    detail=f"Insufficient stock. Available: {product.stock}",
                 )
 
             cart[str(product_id)]["quantity"] = quantity
@@ -93,11 +95,11 @@ class CartManager:
 
     @staticmethod
     async def remove_from_cart(request: Request, product_id: int) -> dict:
-        """Удалить товар из корзины."""
+        """Remove product from cart."""
         cart = CartManager.get_cart(request)
 
         if str(product_id) not in cart:
-            raise HTTPException(status_code=404, detail="Товар не найден в корзине")
+            raise HTTPException(status_code=404, detail="Product not found in cart")
 
         del cart[str(product_id)]
         CartManager.save_cart(request, cart)
@@ -108,7 +110,7 @@ class CartManager:
         request: Request,
         session: AsyncSession,
     ) -> dict:
-        """Получить детальную информацию о корзине."""
+        """Get detailed cart information."""
         cart = CartManager.get_cart(request)
 
         if not cart:

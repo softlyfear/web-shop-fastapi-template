@@ -1,3 +1,5 @@
+"""OrderItem CRUD operations."""
+
 from decimal import Decimal
 
 from sqlalchemy import select
@@ -9,12 +11,14 @@ from app.schemas import OrderItemCreate, OrderItemUpdate
 
 
 class OrderItemCrud(BaseCrud[OrderItem, OrderItemCreate, OrderItemUpdate]):
+    """CRUD operations for OrderItem model."""
+
     async def get_by_order_id(
         self,
         session: AsyncSession,
         order_id: int,
     ) -> list[OrderItem]:
-        """Получить все позиции заказа."""
+        """Get all order items."""
         stmt = select(OrderItem).where(OrderItem.order_id == order_id)
         result = await session.execute(stmt)
         return list(result.scalars().all())
@@ -25,15 +29,15 @@ class OrderItemCrud(BaseCrud[OrderItem, OrderItemCreate, OrderItemUpdate]):
         obj_in: OrderItemCreate,
         order_id: int,
     ) -> OrderItem:
-        """Создать позицию заказа с проверкой наличия товара."""
+        """Create order item with stock validation."""
         product = await session.get(Product, obj_in.product_id)
         if not product:
-            raise ValueError(f"Продукт с ID={obj_in.product_id} не найден")
+            raise ValueError(f"Product with ID={obj_in.product_id} not found")
 
         if product.stock < obj_in.quantity:
             raise ValueError(
-                f"Не достаточно товара на складе {product.name}. "
-                f"Доступно: {product.stock}, запрошено: {obj_in.quantity}"
+                f"Insufficient stock for {product.name}. "
+                f"Available: {product.stock}, requested: {obj_in.quantity}"
             )
 
         data = obj_in.model_dump()
@@ -53,7 +57,7 @@ class OrderItemCrud(BaseCrud[OrderItem, OrderItemCreate, OrderItemUpdate]):
         session: AsyncSession,
         order_id: int,
     ) -> Decimal:
-        """Вычислить общую стоимость заказа."""
+        """Calculate order total price."""
         items = await self.get_by_order_id(session, order_id)
         return sum(item.price * item.quantity for item in items)
 

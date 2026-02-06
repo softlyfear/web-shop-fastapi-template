@@ -1,3 +1,5 @@
+"""Pydantic schemas package."""
+
 from app.schemas.auth import (
     LoginRequest,
     RefreshRequest,

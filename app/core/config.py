@@ -1,3 +1,5 @@
+"""Application configuration settings."""
+
 from pathlib import Path
 
 from pydantic import computed_field
@@ -8,6 +10,8 @@ CERTS_DIR = BASE_DIR / "app" / "core" / "certs"
 
 
 class DatabaseSettings(BaseSettings):
+    """Database connection and pool configuration."""
+
     USER: str
     PASSWORD: str
     HOST: str
@@ -25,6 +29,7 @@ class DatabaseSettings(BaseSettings):
     @computed_field
     @property
     def DATABASE_URL(self) -> str:
+        """Construct PostgreSQL connection URL."""
         return (
             f"postgresql+asyncpg://"
             f"{self.USER}:{self.PASSWORD}"
@@ -39,6 +44,8 @@ class DatabaseSettings(BaseSettings):
 
 
 class AdminSettings(BaseSettings):
+    """Admin panel configuration."""
+
     SECRET_KEY: str
 
     CAN_CREATE: bool
@@ -54,6 +61,8 @@ class AdminSettings(BaseSettings):
 
 
 class AuthJWTSettings(BaseSettings):
+    """JWT authentication configuration."""
+
     private_key_path: Path = CERTS_DIR / "jwt-private.pem"
     public_key_path: Path = CERTS_DIR / "jwt-public.pem"
     algorithm: str = "RS256"
@@ -62,12 +71,14 @@ class AuthJWTSettings(BaseSettings):
 
     @property
     def private_key(self) -> str:
+        """Load and cache JWT private key."""
         if not hasattr(self, "_private_key"):
             self._private_key = self.private_key_path.read_text()
         return self._private_key
 
     @property
     def public_key(self) -> str:
+        """Load and cache JWT public key."""
         if not hasattr(self, "_public_key"):
             self._public_key = self.public_key_path.read_text()
         return self._public_key
@@ -80,6 +91,8 @@ class AuthJWTSettings(BaseSettings):
 
 
 class Settings(BaseSettings):
+    """Application settings container."""
+
     db: DatabaseSettings = DatabaseSettings()  # type: ignore
     admin: AdminSettings = AdminSettings()  # type: ignore
     auth_jwt: AuthJWTSettings = AuthJWTSettings()
