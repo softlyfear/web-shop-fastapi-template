@@ -19,7 +19,7 @@ class CartManager:
 
     @staticmethod
     def save_cart(request: Request, cart: dict) -> None:
-        """Сохранить корзину в сессию."""
+        """Save cart to session."""
         request.session["cart"] = cart
 
     @staticmethod

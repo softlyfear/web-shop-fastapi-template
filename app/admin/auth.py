@@ -46,7 +46,7 @@ class AdminAuth(AuthenticationBackend):
         return False
 
     async def logout(self, request: Request) -> bool:
-        """Выход - очистка только admin данных из session."""
+        """Logout - clear only admin data from session."""
         request.session.pop("admin_token", None)
         request.session.pop("admin_user_id", None)
         request.session.pop("admin_username", None)
@@ -71,7 +71,7 @@ class AdminAuth(AuthenticationBackend):
             return False
 
         except Exception:
-            # Очищаем только admin-ключи из сессии
+            # Clear only admin keys from session
             request.session.pop("admin_token", None)
             request.session.pop("admin_user_id", None)
             request.session.pop("admin_username", None)

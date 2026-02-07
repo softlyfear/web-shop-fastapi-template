@@ -13,15 +13,15 @@ async def home(
     session: SessionDep,
 ) -> HTMLResponse:
     """
-    Отображение домашней страницы.
-    Показываем категории и новые/популярные товары.
+    Display home page.
+    Show categories and new/popular products.
     """
-    # Получаем все категории с количеством товаров
+    # Get all categories with product count
     categories_with_counts = await category_crud.get_categories_with_product_count(
         session
     )
 
-    # Получаем последние 8 активных товаров (новинки)
+    # Get last 8 active products (new arrivals)
     featured_products = await product_crud.search_products(
         session=session,
         only_active=True,
@@ -29,18 +29,18 @@ async def home(
         limit=8,
     )
 
-    # Получаем популярные товары (можно добавить логику по количеству заказов)
-    # Пока просто берем случайные активные товары
+    # Get popular products (can add logic based on order count)
+    # For now, just get random active products
     popular_products = await product_crud.get_active_products(
         session=session,
         limit=4,
     )
 
-    # Получаем информацию о текущем пользователе из сессии
+    # Get current user information from session
     user_id = request.session.get("user_id")
     username = request.session.get("username")
 
-    # Получаем количество товаров в корзине
+    # Get number of items in cart
     from app.utils.cart import CartManager
 
     cart = CartManager.get_cart(request)

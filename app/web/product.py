@@ -18,7 +18,7 @@ async def product_detail(
     request: Request,
     session: SessionDep,
 ):
-    """Отображение детальной страницы товара."""
+    """Display product detail page."""
     stmt = (
         select(Product)
         .where(Product.slug == slug)
@@ -30,7 +30,7 @@ async def product_detail(
     if not product:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Товар не найден",
+            detail="Product not found",
         )
 
     reviews = await review_crud.get_by_product_id(session, product.id, limit=10)
@@ -48,9 +48,9 @@ async def product_detail(
         user_review = await review_crud.get_user_review_for_product(
             session, user_id, product.id
         )
-        # TODO: Проверить, покупал ли пользователь этот товар
+        # TODO: Check if user purchased this product
         # can_review = await has_purchased_product(session, user_id, product.id)
-        can_review = not user_review  # Упрощенная версия
+        can_review = not user_review  # Simplified version
 
     return templates.TemplateResponse(
         request=request,
@@ -76,10 +76,10 @@ async def add_review(
     rating: int = Form(..., ge=1, le=5),
     comment: str | None = Form(None),
 ):
-    """Добавить отзыв на товар."""
+    """Add product review."""
     user_id = request.session.get("user_id")
     if not user_id:
-        request.session["flash_message"] = "Необходимо войти для добавления отзыва"
+        request.session["flash_message"] = "Login required to add review"
         request.session["flash_type"] = "error"
         return RedirectResponse(
             url=request.url_for("login"),
@@ -90,7 +90,7 @@ async def add_review(
     if not product:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Товар не найден",
+            detail="Product not found",
         )
 
     review_data = ReviewCreate(
@@ -102,13 +102,13 @@ async def add_review(
 
     try:
         await review_crud.create_with_validation(session, review_data)
-        request.session["flash_message"] = "Отзыв успешно добавлен"
+        request.session["flash_message"] = "Review successfully added"
         request.session["flash_type"] = "success"
     except ValueError as e:
         request.session["flash_message"] = str(e)
         request.session["flash_type"] = "error"
     except Exception as e:
-        request.session["flash_message"] = f"Ошибка при добавлении отзыва: {str(e)}"
+        request.session["flash_message"] = f"Error adding review: {str(e)}"
         request.session["flash_type"] = "error"
 
     return RedirectResponse(
@@ -124,19 +124,19 @@ async def add_product_to_cart(
     session: SessionDep,
     quantity: int = Form(1, ge=1),
 ):
-    """Добавить товар в корзину со страницы товара."""
+    """Add product to cart from product page."""
     from app.utils.cart import CartManager
 
     product = await product_crud.get_by_slug(session, slug)
     if not product:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Товар не найден",
+            detail="Product not found",
         )
 
     try:
         await CartManager.add_to_cart(request, session, product.id, quantity)
-        request.session["flash_message"] = f"Товар '{product.name}' добавлен в корзину"
+        request.session["flash_message"] = f"Product '{product.name}' added to cart"
         request.session["flash_type"] = "success"
     except Exception as e:
         request.session["flash_message"] = str(e)

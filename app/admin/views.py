@@ -45,7 +45,7 @@ class CategoryAdmin(BaseAdmin, model=Category):
     ]
 
     async def insert_model(self, request, data):
-        """Авто-генерация slug"""
+        """Auto-generate slug"""
         if not data.get("slug"):
             data["slug"] = slugify(data.get("name", ""))
         return await super().insert_model(request, data)
@@ -91,7 +91,7 @@ class ProductAdmin(BaseAdmin, model=Product):
 
     form_args = {
         "image": {
-            "label": "Изображение",
+            "label": "Image",
             "render_kw": {"accept": "image/*"},
         }
     }

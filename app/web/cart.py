@@ -13,7 +13,7 @@ async def view_cart(
     request: Request,
     session: SessionDep,
 ):
-    """Отображение страницы корзины."""
+    """Display cart page."""
     cart_details = await CartManager.get_cart_details(request, session)
 
     return templates.TemplateResponse(
@@ -35,10 +35,10 @@ async def add_to_cart(
     product_id: int = Form(...),
     quantity: int = Form(1),
 ):
-    """Добавить товар в корзину (из формы)."""
+    """Add product to cart (from form)."""
     try:
         await CartManager.add_to_cart(request, session, product_id, quantity)
-        request.session["flash_message"] = "Товар добавлен в корзину"
+        request.session["flash_message"] = "Product added to cart"
         request.session["flash_type"] = "success"
     except Exception as e:
         request.session["flash_message"] = str(e)
@@ -57,10 +57,10 @@ async def update_cart(
     product_id: int = Form(...),
     quantity: int = Form(...),
 ):
-    """Обновить количество товара в корзине."""
+    """Update cart item quantity."""
     try:
         await CartManager.update_cart_item(request, session, product_id, quantity)
-        request.session["flash_message"] = "Корзина обновлена"
+        request.session["flash_message"] = "Cart updated"
         request.session["flash_type"] = "success"
     except Exception as e:
         request.session["flash_message"] = str(e)
@@ -77,10 +77,10 @@ async def remove_from_cart(
     request: Request,
     product_id: int,
 ):
-    """Удалить товар из корзины."""
+    """Remove product from cart."""
     try:
         await CartManager.remove_from_cart(request, product_id)
-        request.session["flash_message"] = "Товар удален из корзины"
+        request.session["flash_message"] = "Product removed from cart"
         request.session["flash_type"] = "success"
     except Exception as e:
         request.session["flash_message"] = str(e)
@@ -94,9 +94,9 @@ async def remove_from_cart(
 
 @router.post("/clear", name="cart_clear")
 async def clear_cart(request: Request):
-    """Очистить всю корзину."""
+    """Clear entire cart."""
     CartManager.clear_cart(request)
-    request.session["flash_message"] = "Корзина очищена"
+    request.session["flash_message"] = "Cart cleared"
     request.session["flash_type"] = "success"
 
     return RedirectResponse(

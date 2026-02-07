@@ -11,12 +11,12 @@ router = APIRouter()
 
 
 def require_auth(request: Request) -> int:
-    """Проверка авторизации, возвращает user_id или редирект."""
+    """Check authentication, return user_id or raise exception."""
     user_id = request.session.get("user_id")
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Необходимо войти в систему",
+            detail="Login required",
         )
     return user_id
 
@@ -26,13 +26,13 @@ async def account_page(
     request: Request,
     session: SessionDep,
 ):
-    """Главная страница личного кабинета."""
+    """Main account page."""
     user_id = require_auth(request)
 
-    # Получаем пользователя
+    # Get user
     user = await user_crud.get(session, user_id)
     if not user:
-        # Очищаем только данные веб-пользователя, сохраняя админские
+        # Clear only web user data, keep admin data
         request.session.pop("user_id", None)
         request.session.pop("username", None)
         request.session.pop("is_superuser", None)
@@ -41,10 +41,10 @@ async def account_page(
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
-    # Получаем статистику
+    # Get statistics
     stats = await user_crud.get_user_statistics(session, user_id)
 
-    # Получаем последние заказы
+    # Get recent orders
     recent_orders = await order_crud.get_by_user_id(session, user_id, limit=5)
 
     return templates.TemplateResponse(
@@ -65,10 +65,10 @@ async def account_orders(
     session: SessionDep,
     status_filter: str | None = None,
 ):
-    """Страница истории заказов."""
+    """Order history page."""
     user_id = require_auth(request)
 
-    # Получаем заказы
+    # Get orders
     if status_filter:
         try:
             order_status = OrderStatus[status_filter]
@@ -100,23 +100,23 @@ async def account_order_detail(
     session: SessionDep,
     order_id: int,
 ):
-    """Детальная информация о заказе."""
+    """Order detail page."""
     user_id = require_auth(request)
 
-    # Получаем заказ с items
+    # Get order with items
     order = await order_crud.get_with_items(session, order_id)
 
     if not order:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Заказ не найден",
+            detail="Order not found",
         )
 
-    # Проверяем доступ
+    # Check access
     if order.user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Нет доступа к этому заказу",
+            detail="No access to this order",
         )
 
     return templates.TemplateResponse(
@@ -135,31 +135,31 @@ async def cancel_order(
     session: SessionDep,
     order_id: int,
 ):
-    """Отменить заказ (только для статуса pending)."""
+    """Cancel order (only for pending status)."""
     user_id = require_auth(request)
 
-    # Получаем заказ
+    # Get order
     order = await order_crud.get(session, order_id)
 
     if not order:
-        request.session["flash_message"] = "Заказ не найден"
+        request.session["flash_message"] = "Order not found"
         request.session["flash_type"] = "error"
         return RedirectResponse(
             url=request.url_for("account_orders"),
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
-    # Проверяем доступ
+    # Check access
     if order.user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Нет доступа к этому заказу",
+            detail="No access to this order",
         )
 
-    # Проверяем, что заказ можно отменить
+    # Check that order can be cancelled
     if order.status != OrderStatus.pending:
         request.session["flash_message"] = (
-            f"Невозможно отменить заказ со статусом '{order.status.value}'"
+            f"Cannot cancel order with status '{order.status.value}'"
         )
         request.session["flash_type"] = "error"
         return RedirectResponse(
@@ -167,13 +167,13 @@ async def cancel_order(
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
-    # Отменяем заказ
+    # Cancel order
     try:
         await order_crud.update_status(session, order, OrderStatus.cancelled)
-        request.session["flash_message"] = "Заказ успешно отменен"
+        request.session["flash_message"] = "Order successfully cancelled"
         request.session["flash_type"] = "success"
     except Exception as e:
-        request.session["flash_message"] = f"Ошибка при отмене заказа: {str(e)}"
+        request.session["flash_message"] = f"Error cancelling order: {str(e)}"
         request.session["flash_type"] = "error"
 
     return RedirectResponse(
@@ -189,31 +189,31 @@ async def edit_order(
     order_id: int,
     shipping_address: str = Form(..., min_length=10),
 ):
-    """Изменить адрес доставки заказа (только для статуса pending)."""
+    """Change order shipping address (only for pending status)."""
     user_id = require_auth(request)
 
-    # Получаем заказ
+    # Get order
     order = await order_crud.get(session, order_id)
 
     if not order:
-        request.session["flash_message"] = "Заказ не найден"
+        request.session["flash_message"] = "Order not found"
         request.session["flash_type"] = "error"
         return RedirectResponse(
             url=request.url_for("account_orders"),
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
-    # Проверяем доступ
+    # Check access
     if order.user_id != user_id:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Нет доступа к этому заказу",
+            detail="No access to this order",
         )
 
-    # Проверяем, что заказ можно редактировать
+    # Check that order can be edited
     if order.status != OrderStatus.pending:
         request.session["flash_message"] = (
-            f"Невозможно редактировать заказ со статусом '{order.status.value}'"
+            f"Cannot edit order with status '{order.status.value}'"
         )
         request.session["flash_type"] = "error"
         return RedirectResponse(
@@ -221,17 +221,17 @@ async def edit_order(
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
-    # Обновляем адрес доставки
+    # Update shipping address
     try:
         from app.schemas import OrderUpdate
 
         order_update = OrderUpdate(shipping_address=shipping_address)
         await order_crud.update(session, order, order_update)
 
-        request.session["flash_message"] = "Адрес доставки успешно обновлен"
+        request.session["flash_message"] = "Shipping address successfully updated"
         request.session["flash_type"] = "success"
     except Exception as e:
-        request.session["flash_message"] = f"Ошибка при обновлении заказа: {str(e)}"
+        request.session["flash_message"] = f"Error updating order: {str(e)}"
         request.session["flash_type"] = "error"
 
     return RedirectResponse(
@@ -245,12 +245,12 @@ async def account_profile(
     request: Request,
     session: SessionDep,
 ):
-    """Страница редактирования профиля."""
+    """Profile editing page."""
     user_id = require_auth(request)
 
     user = await user_crud.get(session, user_id)
     if not user:
-        # Очищаем только данные веб-пользователя, сохраняя админские
+        # Clear only web user data, keep admin data
         request.session.pop("user_id", None)
         request.session.pop("username", None)
         request.session.pop("is_superuser", None)
@@ -276,47 +276,47 @@ async def account_profile_update(
     email: str = Form(...),
     username: str = Form(..., min_length=3, max_length=20),
 ):
-    """Обновление профиля."""
+    """Update profile."""
     user_id = require_auth(request)
 
     user = await user_crud.get(session, user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="Пользователь не найден")
+        raise HTTPException(status_code=404, detail="User not found")
 
-    # Проверяем изменение username
+    # Check username change
     if username != user.username:
         existing = await user_crud.get_user_by_username(session, username)
         if existing:
-            request.session["flash_message"] = "Имя пользователя уже занято"
+            request.session["flash_message"] = "Username already taken"
             request.session["flash_type"] = "error"
             return RedirectResponse(
                 url=request.url_for("account_profile"),
                 status_code=status.HTTP_303_SEE_OTHER,
             )
 
-    # Проверяем изменение email
+    # Check email change
     if email != user.email:
         existing = await user_crud.get_user_by_email(session, email)
         if existing:
-            request.session["flash_message"] = "Email уже зарегистрирован"
+            request.session["flash_message"] = "Email already registered"
             request.session["flash_type"] = "error"
             return RedirectResponse(
                 url=request.url_for("account_profile"),
                 status_code=status.HTTP_303_SEE_OTHER,
             )
 
-    # Обновляем данные
+    # Update data
     from app.schemas import UserUpdate
 
     user_update = UserUpdate(username=username, email=email)
 
     try:
         await user_crud.update(session, user, user_update)
-        request.session["username"] = username  # Обновляем сессию
-        request.session["flash_message"] = "Профиль обновлен"
+        request.session["username"] = username  # Update session
+        request.session["flash_message"] = "Profile updated"
         request.session["flash_type"] = "success"
     except Exception as e:
-        request.session["flash_message"] = f"Ошибка: {str(e)}"
+        request.session["flash_message"] = f"Error: {str(e)}"
         request.session["flash_type"] = "error"
 
     return RedirectResponse(
@@ -330,7 +330,7 @@ async def account_password_page(
     request: Request,
     session: SessionDep,
 ):
-    """Страница смены пароля."""
+    """Password change page."""
 
     return templates.TemplateResponse(
         request=request,
@@ -349,12 +349,12 @@ async def account_password_update(
     new_password: str = Form(..., min_length=4),
     new_password_confirm: str = Form(...),
 ):
-    """Обновление пароля."""
+    """Update password."""
     user_id = require_auth(request)
 
-    # Проверяем совпадение новых паролей
+    # Check new passwords match
     if new_password != new_password_confirm:
-        request.session["flash_message"] = "Новые пароли не совпадают"
+        request.session["flash_message"] = "New passwords do not match"
         request.session["flash_type"] = "error"
         return RedirectResponse(
             url=request.url_for("account_password"),
@@ -363,24 +363,24 @@ async def account_password_update(
 
     user = await user_crud.get(session, user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="Пользователь не найден")
+        raise HTTPException(status_code=404, detail="User not found")
 
-    # Проверяем текущий пароль
+    # Check current password
     if not AuthUtils.verify_password(current_password, user.hashed_password):
-        request.session["flash_message"] = "Неверный текущий пароль"
+        request.session["flash_message"] = "Invalid current password"
         request.session["flash_type"] = "error"
         return RedirectResponse(
             url=request.url_for("account_password"),
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
-    # Обновляем пароль
+    # Update password
     try:
         await user_crud.update_password(session, user, new_password)
-        request.session["flash_message"] = "Пароль успешно изменен"
+        request.session["flash_message"] = "Password successfully changed"
         request.session["flash_type"] = "success"
     except Exception as e:
-        request.session["flash_message"] = f"Ошибка: {str(e)}"
+        request.session["flash_message"] = f"Error: {str(e)}"
         request.session["flash_type"] = "error"
 
     return RedirectResponse(

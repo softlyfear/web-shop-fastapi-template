@@ -198,7 +198,7 @@ async def create_order_with_items(
             detail="Order must contain at least one item",
         )
 
-    # Преобразуем items в формат для create_order_with_items
+    # Convert items to format for create_order_with_items
     cart_items = [
         {
             "product_id": item.product_id,

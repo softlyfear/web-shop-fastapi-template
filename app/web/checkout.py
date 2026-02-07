@@ -14,11 +14,11 @@ async def checkout_page(
     request: Request,
     session: SessionDep,
 ):
-    """Отображение страницы оформления заказа."""
+    """Display checkout page."""
     cart_details = await CartManager.get_cart_details(request, session)
 
     if not cart_details["items"]:
-        request.session["flash_message"] = "Корзина пуста"
+        request.session["flash_message"] = "Cart is empty"
         request.session["flash_type"] = "error"
         return RedirectResponse(
             url=request.url_for("cart"),
@@ -27,9 +27,7 @@ async def checkout_page(
 
     user_id = request.session.get("user_id")
     if not user_id:
-        request.session["flash_message"] = (
-            "Необходимо войти в систему для оформления заказа"
-        )
+        request.session["flash_message"] = "Login required to checkout"
         request.session["flash_type"] = "error"
         return RedirectResponse(
             url=request.url_for("login"),
@@ -55,19 +53,19 @@ async def process_checkout(
     shipping_address: str = Form(..., min_length=10),
     payment_method: str = Form(default="cash"),
 ):
-    """Обработка оформления заказа."""
-    # Проверяем авторизацию
+    """Process checkout."""
+    # Check authentication
     user_id = request.session.get("user_id")
     if not user_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Необходимо войти в систему",
+            detail="Login required",
         )
 
     cart = CartManager.get_cart(request)
 
     if not cart:
-        request.session["flash_message"] = "Корзина пуста"
+        request.session["flash_message"] = "Cart is empty"
         request.session["flash_type"] = "error"
         return RedirectResponse(
             url=request.url_for("cart"),
@@ -93,10 +91,10 @@ async def process_checkout(
 
         CartManager.clear_cart(request)
 
-        # TODO: Отправка email уведомления (пункт 8)
+        # TODO: Send email notification (item 8)
         # await send_order_confirmation_email(order)
 
-        request.session["flash_message"] = f"Заказ #{order.id} успешно создан"
+        request.session["flash_message"] = f"Order #{order.id} successfully created"
         request.session["flash_type"] = "success"
 
         return RedirectResponse(
@@ -112,7 +110,7 @@ async def process_checkout(
             status_code=status.HTTP_303_SEE_OTHER,
         )
     except Exception as e:
-        request.session["flash_message"] = f"Ошибка при создании заказа: {str(e)}"
+        request.session["flash_message"] = f"Error creating order: {str(e)}"
         request.session["flash_type"] = "error"
         return RedirectResponse(
             url=request.url_for("checkout"),

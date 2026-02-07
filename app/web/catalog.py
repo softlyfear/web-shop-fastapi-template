@@ -13,31 +13,31 @@ router = APIRouter()
 async def get_catalog(
     request: Request,
     session: SessionDep,
-    search: str | None = Query(None, description="Поиск по названию или описанию"),
-    category_id: str | None = Query(None, description="Фильтр по категории"),
-    min_price: str | None = Query(None, description="Минимальная цена"),
-    max_price: str | None = Query(None, description="Максимальная цена"),
-    sort: str = Query("newest", description="Сортировка"),
-    page: int = Query(1, ge=1, description="Номер страницы"),
-    per_page: int = Query(12, ge=1, le=50, description="Товаров на странице"),
+    search: str | None = Query(None, description="Search by name or description"),
+    category_id: str | None = Query(None, description="Filter by category"),
+    min_price: str | None = Query(None, description="Minimum price"),
+    max_price: str | None = Query(None, description="Maximum price"),
+    sort: str = Query("newest", description="Sort by"),
+    page: int = Query(1, ge=1, description="Page number"),
+    per_page: int = Query(12, ge=1, le=50, description="Items per page"),
 ):
     """
-    Отображение страницы каталога товаров с фильтрацией и поиском.
+    Display product catalog page with filtering and search.
 
-    Поддерживает:
-    - Поиск по названию/описанию
-    - Фильтрацию по категории
-    - Фильтрацию по цене
-    - Сортировку
-    - Пагинацию
+    Supports:
+    - Search by name/description
+    - Filter by category
+    - Filter by price
+    - Sorting
+    - Pagination
     """
-    # Преобразуем category_id из строки в int, игнорируя пустые значения
+    # Convert category_id from string to int, ignoring empty values
     category_id_int = None
     if category_id and category_id.strip():
         with suppress(ValueError):
             category_id_int = int(category_id)
 
-    # Преобразуем цены из строк в float, игнорируя пустые значения
+    # Convert prices from strings to float, ignoring empty values
     min_price_float = None
     max_price_float = None
     if min_price and min_price.strip():
@@ -47,18 +47,18 @@ async def get_catalog(
         with suppress(ValueError):
             max_price_float = float(max_price)
 
-    # Получаем все категории для фильтра
+    # Get all categories for filter
     categories = await category_crud.get_categories_with_product_count(session)
 
-    # Получаем выбранную категорию для отображения имени
+    # Get selected category to display name
     selected_category = None
     if category_id_int:
         selected_category = await category_crud.get(session, category_id_int)
 
-    # Вычисляем offset для пагинации
+    # Calculate offset for pagination
     offset = (page - 1) * per_page
 
-    # Получаем товары с фильтрами
+    # Get products with filters
     products = await product_crud.search_products(
         session=session,
         search_query=search,
@@ -71,8 +71,8 @@ async def get_catalog(
         limit=per_page,
     )
 
-    # Получаем общее количество товаров для пагинации (упрощенно)
-    # В реальном приложении лучше сделать отдельный метод count
+    # Get total product count for pagination (simplified)
+    # In a real application, better to create a separate count method
     all_products = await product_crud.search_products(
         session=session,
         search_query=search,
@@ -80,34 +80,34 @@ async def get_catalog(
         min_price=min_price_float,
         max_price=max_price_float,
         only_active=True,
-        limit=1000,  # Берем большое число для подсчета
+        limit=1000,  # Get large number for counting
     )
     total_products = len(all_products)
     total_pages = (total_products + per_page - 1) // per_page
 
-    # Получаем информацию о пользователе
+    # Get user information
     user_id = request.session.get("user_id")
     username = request.session.get("username")
 
-    # Количество товаров в корзине
+    # Number of items in cart
     from app.utils.cart import CartManager
 
     cart = CartManager.get_cart(request)
     cart_count = sum(item.get("quantity", 0) for item in cart.values())
 
-    # Опции сортировки для отображения в UI
+    # Sort options for UI display
     sort_options = [
-        {"value": "newest", "label": "Новинки"},
-        {"value": "oldest", "label": "Старые"},
-        {"value": "price_asc", "label": "Цена: по возрастанию"},
-        {"value": "price_desc", "label": "Цена: по убыванию"},
-        {"value": "name_asc", "label": "Название: А-Я"},
-        {"value": "name_desc", "label": "Название: Я-А"},
+        {"value": "newest", "label": "Newest"},
+        {"value": "oldest", "label": "Oldest"},
+        {"value": "price_asc", "label": "Price: Low to High"},
+        {"value": "price_desc", "label": "Price: High to Low"},
+        {"value": "name_asc", "label": "Name: A-Z"},
+        {"value": "name_desc", "label": "Name: Z-A"},
     ]
 
     return templates.TemplateResponse(
         request=request,
-        name="catalog.html",  # Используем отдельный шаблон для каталога
+        name="catalog.html",  # Use separate template for catalog
         context={
             "request": request,
             "products": products,
@@ -139,14 +139,14 @@ async def get_catalog_by_category_slug(
     per_page: int = Query(12, ge=1, le=50),
 ):
     """
-    Каталог товаров определенной категории (по slug).
-    Например: /catalog/category/hops
+    Product catalog for specific category (by slug).
+    Example: /catalog/category/hops
     """
-    # Находим категорию по slug
+    # Find category by slug
     category = await category_crud.get_by_slug(session, slug)
 
     if not category:
-        # Редирект на общий каталог если категория не найдена
+        # Redirect to general catalog if category not found
         from fastapi.responses import RedirectResponse
         from starlette import status
 
@@ -155,7 +155,7 @@ async def get_catalog_by_category_slug(
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
-    # Редирект на основной каталог с фильтром по категории
+    # Redirect to main catalog with category filter
     from fastapi.responses import RedirectResponse
     from starlette import status
 
