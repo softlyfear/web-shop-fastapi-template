@@ -164,7 +164,12 @@ async def register_process(
 @router.get("/logout", name="logout")
 async def logout(request: Request):
     """Выход из системы."""
-    request.session.clear()
+    # Очищаем только данные веб-пользователя, сохраняя админские
+    request.session.pop("user_id", None)
+    request.session.pop("username", None)
+    request.session.pop("is_superuser", None)
+    request.session.pop("cart", None)
+
     request.session["flash_message"] = "Вы вышли из системы"
     request.session["flash_type"] = "success"
 

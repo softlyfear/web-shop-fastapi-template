@@ -35,20 +35,26 @@ class AdminAuth(AuthenticationBackend):
                 user_id=user.id, username=user.username
             )
             request.session.update(
-                {"token": token, "user_id": user.id, "username": user.username}
+                {
+                    "admin_token": token,
+                    "admin_user_id": user.id,
+                    "admin_username": user.username,
+                }
             )
             return True
 
         return False
 
     async def logout(self, request: Request) -> bool:
-        """Выход - очистка session."""
-        request.session.clear()
+        """Выход - очистка только admin данных из session."""
+        request.session.pop("admin_token", None)
+        request.session.pop("admin_user_id", None)
+        request.session.pop("admin_username", None)
         return True
 
     async def authenticate(self, request: Request) -> bool:
         """Validate on each admin request."""
-        token = request.session.get("token")
+        token = request.session.get("admin_token")
 
         if not token:
             return False
@@ -65,5 +71,8 @@ class AdminAuth(AuthenticationBackend):
             return False
 
         except Exception:
-            request.session.clear()
+            # Очищаем только admin-ключи из сессии
+            request.session.pop("admin_token", None)
+            request.session.pop("admin_user_id", None)
+            request.session.pop("admin_username", None)
             return False

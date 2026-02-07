@@ -32,7 +32,10 @@ async def account_page(
     # Получаем пользователя
     user = await user_crud.get(session, user_id)
     if not user:
-        request.session.clear()
+        # Очищаем только данные веб-пользователя, сохраняя админские
+        request.session.pop("user_id", None)
+        request.session.pop("username", None)
+        request.session.pop("is_superuser", None)
         return RedirectResponse(
             url=request.url_for("login"),
             status_code=status.HTTP_303_SEE_OTHER,
@@ -247,7 +250,10 @@ async def account_profile(
 
     user = await user_crud.get(session, user_id)
     if not user:
-        request.session.clear()
+        # Очищаем только данные веб-пользователя, сохраняя админские
+        request.session.pop("user_id", None)
+        request.session.pop("username", None)
+        request.session.pop("is_superuser", None)
         return RedirectResponse(
             url=request.url_for("login"),
             status_code=status.HTTP_303_SEE_OTHER,
