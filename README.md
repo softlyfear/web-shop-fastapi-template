@@ -46,6 +46,7 @@ app/
 - Python 3.14+
 - [uv](https://github.com/astral-sh/uv) - быстрый менеджер пакетов Python
 - PostgreSQL 16+ (или Docker)
+- Docker с Docker Compose plugin v2+ (для Docker-режима)
 
 ### 1. Клонирование и установка
 

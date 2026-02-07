@@ -174,23 +174,23 @@ docker-build:
 ## docker-up: Start containers
 docker-up:
 	@echo "$(GREEN)==> Starting containers...$(NC)"
-	docker-compose up -d
+	docker compose up -d
 	@echo "$(GREEN)==> Containers started!$(NC)"
 
 ## docker-down: Stop containers
 docker-down:
 	@echo "$(YELLOW)==> Stopping containers...$(NC)"
-	docker-compose down
+	docker compose down
 
 ## docker-logs: View container logs
 docker-logs:
 	@echo "$(BLUE)==> Container logs (Ctrl+C to exit):$(NC)"
-	docker-compose logs -f
+	docker compose logs -f
 
 ## docker-shell: Open shell in container
 docker-shell:
 	@echo "$(GREEN)==> Opening shell in app container...$(NC)"
-	docker-compose exec app /bin/bash
+	docker compose exec app /bin/bash
 
 ## docker-restart: Restart containers
 docker-restart: docker-down docker-up
@@ -213,5 +213,5 @@ clean:
 clean-all: clean
 	@echo "$(RED)==> Removing .venv and docker volumes...$(NC)"
 	rm -rf .venv
-	docker-compose down -v 2>/dev/null || true
+	docker compose down -v 2>/dev/null || true
 	@echo "$(GREEN)==> Deep cleanup complete!$(NC)"
