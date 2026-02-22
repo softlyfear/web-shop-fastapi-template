@@ -1,14 +1,10 @@
 """CRUD router factory."""
 
-from typing import TYPE_CHECKING
-
 from fastapi import APIRouter, status
 from pydantic import BaseModel
 
+from app.api.v1.utils import get_or_404
 from app.core import SessionDep
-
-if TYPE_CHECKING:
-    from app.api import get_or_404
 
 
 def get_plural_name(name: str) -> str:
