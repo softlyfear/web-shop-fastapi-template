@@ -1,0 +1,69 @@
+# Fast test and use categories API
+
+@baseurl = http://127.0.0.1:8000/categories/
+
+
+### ─── GET ──────────────────────────────────────
+@offset = 0
+@limit = 20
+@id = 1
+@slug = bmw
+
+### Get all categories with offset and limit 
+GET {{baseurl}}?offset={{offset}}&limit={{limit}} HTTP/1.1
+Accept: application/json
+
+### Get category by id
+GET {{baseurl}}{{id}} HTTP/1.1
+Accept: application/json
+
+### Get category by slug
+GET {{baseurl}}slug/{{slug}} HTTP/1.1
+Accept: application/json
+
+### Get category by id with products
+GET {{baseurl}}{{id}}/with-products HTTP/1.1
+Accept: application/json
+
+### Get all categories with product counts
+GET {{baseurl}}stats/product-counts HTTP/1.1
+Accept: application/json
+
+
+### ─── POST ──────────────────────────────────────
+@category_name = Auto
+@slug_name = 
+
+### Create category with slug auto generation
+POST {{baseurl}} HTTP/1.1
+Accept: application/json
+content-type: application/json
+
+{
+  "name": "{{category_name}}",
+  "slug": "{{slug_name}}"
+}
+
+
+### ─── PATCH ──────────────────────────────────────
+@update_id = 1
+@new_category = Auto
+@new_slug = 
+
+### Update category name and/or slug by id
+PATCH {{baseurl}}{{update_id}} HTTP/1.1
+Accept: application/json
+content-type: application/json
+
+{
+  "name": "{{new_category}}",
+  "slug": "{{new_slug}}"
+}
+
+
+### ─── DELETE ──────────────────────────────────────
+@delete_id = 1
+
+### Delete category by id
+DELETE {{baseurl}}{{delete_id}} HTTP/1.1
+Accept: application/json
