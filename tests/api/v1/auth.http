@@ -1,0 +1,48 @@
+# Fast test and use authentication API
+
+@baseurl = http://127.0.0.1:8000/auth/
+
+
+### ─── GET ──────────────────────────────────────
+### Get me
+@access_token = 
+GET {{baseurl}}me HTTP/1.1
+Accept: application/json
+Authorization: Bearer "{{access_token}}"
+
+
+### ─── POST ──────────────────────────────────────
+@email = test@gmail.com
+@username = test
+@password = test
+
+### Register
+POST {{baseurl}}register HTTP/1.1
+Accept: application/json
+content-type: application/json
+
+{
+  "email": "{{email}}",
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+### Login
+POST {{baseurl}}login HTTP/1.1
+Accept: application/json
+content-type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+### Refresh
+@refresh_token = 
+POST {{baseurl}}refresh HTTP/1.1
+Accept: application/json
+Content-Type: application/json
+
+{
+  "refresh_token": "{{refresh_token}}"
+}
